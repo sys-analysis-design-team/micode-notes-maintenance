@@ -39,6 +39,8 @@
     <!-- note list string -->
     <string name="menu_create_folder">新建文件夾</string>
     <string name="menu_export_text">導出文本</string>
+    <string name="menu_backup_json">備份至 JSON 檔案</string>
+    <string name="menu_restore_json">從 JSON 檔案還原</string>
     <string name="menu_sync">同步</string>
     <string name="menu_sync_cancel">取消同步</string>
     <string name="menu_setting">設置</string>
@@ -78,6 +80,15 @@
     <string name="error_note_empty_for_send_to_desktop">不能將空便籤發送到桌面</string>
     <string name="success_sdcard_export">導出成功</string>
     <string name="failed_sdcard_export">導出失敗</string>
+    <!-- 備份與還原 -->
+    <string name="backup_title">備份</string>
+    <string name="backup_done">已儲存 %1$d 條便籤、%2$d 個資料夾到所選檔案。</string>
+    <string name="backup_failed">備份失敗：%1$s</string>
+    <string name="restore_title">還原備份</string>
+    <string name="restore_confirm">檔案中包含 %1$d 條便籤、%2$d 個資料夾，將追加到現有便籤中，原有資料不會刪除。</string>
+    <string name="restore_done">已還原 %1$d 條便籤、%2$d 個資料夾。</string>
+    <string name="restore_failed">還原失敗：%1$s</string>
+    <string name="restore_invalid">備份檔案無效：%1$s</string>
     <string name="format_exported_file_location">已將文本文件(%1$s)導出至SD(%2$s)目錄</string>
     <!-- Sync -->
     <string name="ticker_syncing">同步便簽...</string>

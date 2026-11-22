@@ -52,4 +52,6 @@ android {
 
 dependencies {
     testImplementation("junit:junit:4.13.2")
+    // JVM 单测使用真实实现，运行时仍使用 Android 框架自带的 org.json
+    testImplementation("org.json:json:20240303")
 }

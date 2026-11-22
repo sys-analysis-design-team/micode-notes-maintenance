@@ -38,6 +38,8 @@
     <!-- note list string -->
     <string name="menu_create_folder">新建文件夹</string>
     <string name="menu_export_text">导出文本</string>
+    <string name="menu_backup_json">备份到 JSON 文件</string>
+    <string name="menu_restore_json">从 JSON 文件恢复</string>
     <string name="menu_sync">同步</string>
     <string name="menu_sync_cancel">取消同步</string>
     <string name="menu_setting">设置</string>
@@ -79,6 +81,15 @@
     <string name="error_note_empty_for_send_to_desktop">不能将空便签发送到桌面</string>
     <string name="success_sdcard_export">导出成功</string>
     <string name="failed_sdcard_export">导出失败</string>
+    <!-- 备份与恢复 -->
+    <string name="backup_title">备份</string>
+    <string name="backup_done">已保存 %1$d 条便签、%2$d 个文件夹到所选文件。</string>
+    <string name="backup_failed">备份失败：%1$s</string>
+    <string name="restore_title">恢复备份</string>
+    <string name="restore_confirm">文件中包含 %1$d 条便签、%2$d 个文件夹，将追加到现有便签中，原有数据不会删除。</string>
+    <string name="restore_done">已恢复 %1$d 条便签、%2$d 个文件夹。</string>
+    <string name="restore_failed">恢复失败：%1$s</string>
+    <string name="restore_invalid">备份文件无效：%1$s</string>
     <string name="format_exported_file_location">已将文本文件(%1$s)输出至SD卡(%2$s)目录</string>
     <!-- Sync -->
     <string name="ticker_syncing">同步便签...</string>

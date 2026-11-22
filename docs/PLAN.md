@@ -8,8 +8,8 @@
 | 编号 | 类型 | 内容 | 验收标准 | 状态 |
 |---|---|---|---|---|
 | M1 | 缺陷 | 老工程现代化与 Android 12–17 兼容；GTask 退役 | assembleDebug 成功；Pixel_7 可安装启动；新建/编辑/保存/搜索/删除/Widget 正常；旧同步入口不误导 | ✅（Widget 回归待做） |
-| M2 | 缺陷 | Provider 数据安全 + SQL 修复 + 测试 | 本应用 CRUD 正常；独立测试 App 无法读写 Provider；恶意 selection 不扩大结果；非法 URI 有确定行为 | ⬜ |
-| M3 | 功能 | SAF 导出 UTF-8 TXT + JSON 完整备份/恢复 | 中文/Emoji 导出正确；≥20 条不同类型便签可备份恢复；坏 JSON/取消/空文件不破坏现有数据 | ⬜ |
+| M2 | 缺陷 | Provider 数据安全 + SQL 修复 + 测试 | 本应用 CRUD 正常；独立测试 App 无法读写 Provider；恶意 selection 不扩大结果；非法 URI 有确定行为 | ✅ |
+| M3 | 功能 | SAF 导出 UTF-8 TXT + JSON 完整备份/恢复 | 中文/Emoji 导出正确；≥20 条不同类型便签可备份恢复；坏 JSON/取消/空文件不破坏现有数据 | ✅ |
 | M4 | 缺陷 | 提醒与通知重构 | 可设置/修改/取消；通知可见、点击回跳；权限拒绝有说明；重启后恢复提醒 | ⬜ |
 | M5 | 功能 | 回收站浏览/恢复/彻底删除 | 删除后普通列表不可见、回收站可见；恢复正文完整；彻底删除需确认；触发器计数正常 | ⬜ |
 | M6 | 功能 | AI 摘要 + 待办提取 | 真实 LLM 至少成功一次；无 Key/断网/超时/坏 JSON 不崩溃；用户确认后才写入；Key 不入库 | ⬜ |
@@ -23,6 +23,21 @@
 - 联系人查询捕获 `SecurityException`，未授权时退化为显示号码。
 - 验证：构建、安装、启动、新建/编辑/保存、列表、搜索、设置页、提醒设置与触发均通过；Widget 待最终回归。
 - 遗留：`NoteItemData` 主线程查询联系人可改异步（不影响验收）。
+
+### M2 完成情况
+
+- `NotesProvider` 设 `android:exported="false"`：安装后从 adb（UID 2000）查询 `content://micode_notes/note` 被 `SecurityException` 拒绝，应用内 CRUD 正常；证据 `logs/m2_external_denied.txt`。
+- 新增 `ProviderSql` 纯 Java 构造器：单条 URI 的 ID 条件、删除附加条件、版本号自增全部改为 `?` 参数绑定，不再把 `selectionArgs` 字符串拼进 SQL。
+- 修复 `delete(CONTENT_NOTE_URI, null, null)` 生成 `(null) AND ID>0` 的 SQL 错误；`insert` 失败返回 `null`；补齐 `getType` 的 dir/item MIME。
+- 回归测试 `ProviderSqlTest` 7 条：ID 条件、条件包裹、参数顺序、注入字符串只进参数不进 SQL 文本、无 ID/无条件场景。
+
+### M3 完成情况
+
+- 新增 `BackupNote`（不可变模型）与 `NoteBackupCodec`（V1 JSON，严格校验版本、类型、ID 缺失/重复），`NoteBackupCodecTest` 9 条，含中文、引号、反斜杠、换行、Emoji 往返。
+- `BackupUtils` 重写：文本导出改为调用方提供 `OutputStream`（UTF-8），JSON 备份收集用户文件夹与文本便签；恢复先建文件夹并做旧 ID→新 ID 映射，逐条写入，异常时回滚本次新增记录。
+- 列表菜单新增「备份到 JSON 文件」「从 JSON 文件恢复」，保存/打开走 SAF，移除 `WRITE_EXTERNAL_STORAGE` 权限。
+- 设备验证（Pixel_7 / Android 17）：22 条便签 + 2 个文件夹；文本导出 2.45 KB，中文与 🥛🥚🍞 无乱码；JSON 6.74 KB，含 24 条记录（22 便签 + 2 文件夹）；恢复后数据库 44 条便签 / 4 个文件夹，文件夹计数 10/6 保持正确；坏 JSON 与 0 字节文件均提示错误，数据库保持 22/2 不变。
+- 证据：`logs/m3_seed_list.png`、`m3_full_text_saved.png`、`m3_full_restore_done.png`、`m3_bad_restore.png`、`m3_empty_restore.png`、`m3_full_backup.json`、`m3_full_export.txt`。
 
 ## 二、排期（关键路径）
 

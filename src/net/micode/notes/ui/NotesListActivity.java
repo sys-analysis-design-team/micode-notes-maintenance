@@ -28,6 +28,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.database.Cursor;
+import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
@@ -64,8 +65,10 @@ import net.micode.notes.R;
 import net.micode.notes.data.Notes;
 import net.micode.notes.data.Notes.NoteColumns;
 import net.micode.notes.model.WorkingNote;
+import net.micode.notes.tool.BackupNote;
 import net.micode.notes.tool.BackupUtils;
 import net.micode.notes.tool.DataUtils;
+import net.micode.notes.tool.NoteBackupCodec;
 import net.micode.notes.tool.ResourceParser;
 import net.micode.notes.ui.NotesListAdapter.AppWidgetAttribute;
 import net.micode.notes.widget.NoteWidgetProvider_2x;
@@ -75,7 +78,13 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.OutputStream;
+import java.nio.charset.StandardCharsets;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.HashSet;
+import java.util.List;
+import java.util.Locale;
 
 public class NotesListActivity extends Activity implements OnClickListener, OnItemLongClickListener {
     private static final int FOLDER_NOTE_LIST_QUERY_TOKEN = 0;
@@ -133,6 +142,9 @@ public class NotesListActivity extends Activity implements OnClickListener, OnIt
 
     private final static int REQUEST_CODE_OPEN_NODE = 102;
     private final static int REQUEST_CODE_NEW_NODE  = 103;
+    private final static int REQUEST_CODE_EXPORT_TEXT = 104;
+    private final static int REQUEST_CODE_BACKUP_JSON = 105;
+    private final static int REQUEST_CODE_RESTORE_JSON = 106;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -148,6 +160,19 @@ public class NotesListActivity extends Activity implements OnClickListener, OnIt
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if (resultCode == RESULT_OK && data != null && data.getData() != null) {
+            Uri uri = data.getData();
+            if (requestCode == REQUEST_CODE_EXPORT_TEXT) {
+                exportTextToUri(uri);
+                return;
+            } else if (requestCode == REQUEST_CODE_BACKUP_JSON) {
+                backupToUri(uri);
+                return;
+            } else if (requestCode == REQUEST_CODE_RESTORE_JSON) {
+                restoreFromUri(uri);
+                return;
+            }
+        }
         if (resultCode == RESULT_OK
                 && (requestCode == REQUEST_CODE_OPEN_NODE || requestCode == REQUEST_CODE_NEW_NODE)) {
             mNotesListAdapter.changeCursor(null);
@@ -775,6 +800,13 @@ public class NotesListActivity extends Activity implements OnClickListener, OnIt
             showCreateOrModifyFolderDialog(true);
         } else if (itemId == R.id.menu_export_text) {
             exportNoteToText();
+        } else if (itemId == R.id.menu_backup_json) {
+            startCreateDocument(REQUEST_CODE_BACKUP_JSON, "application/json", ".json");
+        } else if (itemId == R.id.menu_restore_json) {
+            Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT);
+            intent.addCategory(Intent.CATEGORY_OPENABLE);
+            intent.setType("*/*");
+            startActivityForResult(intent, REQUEST_CODE_RESTORE_JSON);
         } else if (itemId == R.id.menu_setting) {
             startPreferenceActivity();
         } else if (itemId == R.id.menu_new_note) {
@@ -791,46 +823,207 @@ public class NotesListActivity extends Activity implements OnClickListener, OnIt
         return true;
     }
 
+    /**
+     * 让用户选保存位置，写入由 SAF 提供的 OutputStream，不再依赖外部存储权限。
+     */
+    private void startCreateDocument(int requestCode, String mimeType, String suffix) {
+        String stamp = new SimpleDateFormat("yyyyMMdd_HHmm", Locale.US).format(new Date());
+        Intent intent = new Intent(Intent.ACTION_CREATE_DOCUMENT);
+        intent.addCategory(Intent.CATEGORY_OPENABLE);
+        intent.setType(mimeType);
+        intent.putExtra(Intent.EXTRA_TITLE, "notes_" + stamp + suffix);
+        startActivityForResult(intent, requestCode);
+    }
+
     private void exportNoteToText() {
-        final BackupUtils backup = BackupUtils.getInstance(NotesListActivity.this);
-        new AsyncTask<Void, Void, Integer>() {
+        startCreateDocument(REQUEST_CODE_EXPORT_TEXT, "text/plain", ".txt");
+    }
+
+    private void exportTextToUri(final Uri uri) {
+        new AsyncTask<Void, Void, String>() {
 
             @Override
-            protected Integer doInBackground(Void... unused) {
-                return backup.exportToText();
+            protected String doInBackground(Void... unused) {
+                try (OutputStream out = mContentResolver.openOutputStream(uri, "wt")) {
+                    if (out == null) {
+                        return getString(R.string.error_sdcard_export);
+                    }
+                    BackupUtils.writeText(NotesListActivity.this, out);
+                    return null;
+                } catch (IOException e) {
+                    Log.e(TAG, "Export text failed", e);
+                    return e.getMessage();
+                }
             }
 
             @Override
-            protected void onPostExecute(Integer result) {
-                if (result == BackupUtils.STATE_SD_CARD_UNMOUONTED) {
-                    AlertDialog.Builder builder = new AlertDialog.Builder(NotesListActivity.this);
-                    builder.setTitle(NotesListActivity.this
-                            .getString(R.string.failed_sdcard_export));
-                    builder.setMessage(NotesListActivity.this
-                            .getString(R.string.error_sdcard_unmounted));
-                    builder.setPositiveButton(android.R.string.ok, null);
-                    builder.show();
-                } else if (result == BackupUtils.STATE_SUCCESS) {
-                    AlertDialog.Builder builder = new AlertDialog.Builder(NotesListActivity.this);
-                    builder.setTitle(NotesListActivity.this
-                            .getString(R.string.success_sdcard_export));
-                    builder.setMessage(NotesListActivity.this.getString(
-                            R.string.format_exported_file_location, backup
-                                    .getExportedTextFileName(), backup.getExportedTextFileDir()));
-                    builder.setPositiveButton(android.R.string.ok, null);
-                    builder.show();
-                } else if (result == BackupUtils.STATE_SYSTEM_ERROR) {
-                    AlertDialog.Builder builder = new AlertDialog.Builder(NotesListActivity.this);
-                    builder.setTitle(NotesListActivity.this
-                            .getString(R.string.failed_sdcard_export));
-                    builder.setMessage(NotesListActivity.this
-                            .getString(R.string.error_sdcard_export));
-                    builder.setPositiveButton(android.R.string.ok, null);
-                    builder.show();
+            protected void onPostExecute(String error) {
+                showMessage(error == null ? R.string.success_sdcard_export
+                        : R.string.failed_sdcard_export, error == null ? null : error);
+            }
+
+        }.execute();
+    }
+
+    private void backupToUri(final Uri uri) {
+        new AsyncTask<Void, Void, Object>() {
+
+            @Override
+            protected Object doInBackground(Void... unused) {
+                try {
+                    BackupUtils.BackupData data = BackupUtils.buildBackup(
+                            NotesListActivity.this);
+                    try (OutputStream out = mContentResolver.openOutputStream(uri, "wt")) {
+                        if (out == null) {
+                            return new IOException("无法打开目标文件");
+                        }
+                        out.write(data.json.getBytes(StandardCharsets.UTF_8));
+                    }
+                    return data;
+                } catch (IOException e) {
+                    Log.e(TAG, "Backup failed", e);
+                    return e;
+                }
+            }
+
+            @Override
+            protected void onPostExecute(Object result) {
+                if (result instanceof BackupUtils.BackupData) {
+                    BackupUtils.BackupData data = (BackupUtils.BackupData) result;
+                    showMessage(R.string.backup_title, getString(R.string.backup_done,
+                            data.noteCount, data.folderCount));
+                } else {
+                    showMessage(R.string.backup_title, getString(R.string.backup_failed,
+                            String.valueOf(((Exception) result).getMessage())));
                 }
             }
 
         }.execute();
+    }
+
+    private void restoreFromUri(final Uri uri) {
+        new AsyncTask<Void, Void, Object>() {
+
+            @Override
+            protected Object doInBackground(Void... unused) {
+                try {
+                    String json = readTextFromUri(uri);
+                    List<BackupNote> parsed = NoteBackupCodec.decode(json);
+                    int folders = 0;
+                    for (BackupNote note : parsed) {
+                        if (note.isFolder()) {
+                            folders++;
+                        }
+                    }
+                    return new ParsedBackup(json, parsed.size() - folders, folders);
+                } catch (NoteBackupCodec.BackupFormatException e) {
+                    return e;
+                } catch (IOException e) {
+                    Log.e(TAG, "Read backup failed", e);
+                    return e;
+                }
+            }
+
+            @Override
+            protected void onPostExecute(Object result) {
+                if (!(result instanceof ParsedBackup)) {
+                    showMessage(R.string.restore_title, getString(R.string.restore_invalid,
+                            String.valueOf(((Exception) result).getMessage())));
+                    return;
+                }
+                final ParsedBackup parsed = (ParsedBackup) result;
+                new AlertDialog.Builder(NotesListActivity.this)
+                        .setTitle(R.string.restore_title)
+                        .setMessage(getString(R.string.restore_confirm, parsed.noteCount,
+                                parsed.folderCount))
+                        .setPositiveButton(android.R.string.ok,
+                                new DialogInterface.OnClickListener() {
+                                    @Override
+                                    public void onClick(DialogInterface dialog, int which) {
+                                        performRestore(parsed.json);
+                                    }
+                                })
+                        .setNegativeButton(android.R.string.cancel, null)
+                        .show();
+            }
+
+        }.execute();
+    }
+
+    private void performRestore(final String json) {
+        new AsyncTask<Void, Void, Object>() {
+
+            @Override
+            protected Object doInBackground(Void... unused) {
+                try {
+                    return BackupUtils.restoreJson(NotesListActivity.this, json);
+                } catch (NoteBackupCodec.BackupFormatException e) {
+                    return e;
+                } catch (IOException e) {
+                    Log.e(TAG, "Restore failed", e);
+                    return e;
+                }
+            }
+
+            @Override
+            protected void onPostExecute(Object result) {
+                if (result instanceof BackupUtils.RestoreResult) {
+                    BackupUtils.RestoreResult restored = (BackupUtils.RestoreResult) result;
+                    showMessage(R.string.restore_title, getString(R.string.restore_done,
+                            restored.noteCount, restored.folderCount));
+                    startAsyncNotesListQuery();
+                } else {
+                    showMessage(R.string.restore_title, getString(R.string.restore_failed,
+                            String.valueOf(((Exception) result).getMessage())));
+                }
+            }
+
+        }.execute();
+    }
+
+    private String readTextFromUri(Uri uri) throws IOException {
+        InputStream in = mContentResolver.openInputStream(uri);
+        if (in == null) {
+            throw new IOException("无法打开备份文件");
+        }
+        BufferedReader reader = new BufferedReader(new InputStreamReader(in,
+                StandardCharsets.UTF_8));
+        try {
+            StringBuilder sb = new StringBuilder();
+            char[] buffer = new char[4096];
+            int length;
+            while ((length = reader.read(buffer)) != -1) {
+                sb.append(buffer, 0, length);
+            }
+            return sb.toString();
+        } finally {
+            reader.close();
+        }
+    }
+
+    private void showMessage(int titleRes, String message) {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle(titleRes);
+        if (message != null) {
+            builder.setMessage(message);
+        }
+        builder.setPositiveButton(android.R.string.ok, null);
+        builder.show();
+    }
+
+    private static final class ParsedBackup {
+
+        final String json;
+
+        final int noteCount;
+
+        final int folderCount;
+
+        ParsedBackup(String json, int noteCount, int folderCount) {
+            this.json = json;
+            this.noteCount = noteCount;
+            this.folderCount = folderCount;
+        }
     }
 
     private boolean isSyncMode() {

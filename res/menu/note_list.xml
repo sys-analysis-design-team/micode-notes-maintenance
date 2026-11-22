@@ -26,6 +26,14 @@
         android:title="@string/menu_export_text"/>
 
     <item
+        android:id="@+id/menu_backup_json"
+        android:title="@string/menu_backup_json"/>
+
+    <item
+        android:id="@+id/menu_restore_json"
+        android:title="@string/menu_restore_json"/>
+
+    <item
         android:id="@+id/menu_setting"
         android:title="@string/menu_setting" />
 

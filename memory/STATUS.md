@@ -21,6 +21,9 @@
 | 新建/输入/保存/列表显示 | ✅ | `logs/app_editor_typed.png`、`logs/app_list_after_save.png` |
 | 本地 Git：master 原始基线 / develop 维护基线 / 3 个成员分支 | ✅ | `git branch` |
 | M1 兼容清理与 GTask 退役 | ✅ | 提交 `84c4916`；构建/启动/CRUD/搜索/设置/提醒冒烟通过；Widget 待回归 |
+| M2 Provider 安全与 SQL 参数化 | ✅ | 提交 `0b77758`；adb 跨应用查询被拒；`ProviderSqlTest` 7/7 |
+| M3 SAF 导出 + JSON 备份恢复 | ✅ | 22 便签/2 文件夹；中文+Emoji 往返正确；恢复 44/4；坏/空 JSON 不改数据 |
+| JVM 单元测试 | ✅ 16/16 | `ProviderSqlTest` 7 + `NoteBackupCodecTest` 9 |
 | 远端小组仓库 | ⏸ 待 GitHub 登录与仓库地址 | — |
 
 ## 三、维护项
@@ -28,8 +31,8 @@
 | 编号 | 内容 | 状态 |
 |---|---|---|
 | M1 | 老工程现代化与 Android 12–17 兼容；GTask 退役 | ✅ 构建/启动/CRUD/搜索/设置/提醒通过；Widget 待最终回归 |
-| M2 | Provider 数据安全 + SQL 修复 + 跨应用拒绝访问测试 | ⬜ |
-| M3 | SAF 导出（UTF-8 TXT）+ JSON 备份/恢复 | ⬜ |
+| M2 | Provider 数据安全 + SQL 修复 + 跨应用拒绝访问测试 | ✅ adb 访问被拒；应用内 CRUD 正常；7 条 SQL 回归测试 |
+| M3 | SAF 导出（UTF-8 TXT）+ JSON 备份/恢复 | ✅ 22 条往返；中文/Emoji 正确；坏/空文件不写入 |
 | M4 | 提醒与通知机制重构 | ⬜ |
 | M5 | 回收站浏览/恢复/彻底删除 | ⬜ |
 | M6 | AI 智能摘要 + 待办提取（真实 LLM + 离线兜底） | ⬜ |
@@ -56,6 +59,6 @@
 ## 六、下一步
 
 1. 确认小组仓库地址/归属，推送 master + develop + 成员分支。
-2. 完成 M1 剩余项：Manifest 全组件检查、PendingIntent 可变性、动态广播、GTask 入口退役。
-3. 按 M2 → M3 → M5 → M4 → M6 顺序实现，每模块单独提交与测试。
+2. 完成 M1 剩余项：Widget 最终回归。
+3. 按 M5 → M4 → M6 顺序实现，每模块单独提交与测试。
 4. 12/6 前决定 M7；12/10 功能冻结。
