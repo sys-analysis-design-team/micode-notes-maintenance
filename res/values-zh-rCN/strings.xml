@@ -31,6 +31,21 @@
     <string name="format_datetime_mdhm">MM月dd日 kk:mm</string>
     <string name="notealert_ok">知道了</string>
     <string name="notealert_enter">查看</string>
+    <!-- M4 提醒通知 -->
+    <string name="reminder_channel_name">便签提醒</string>
+    <string name="reminder_channel_description">便签到期时的提醒通知</string>
+    <string name="reminder_notification_title">便签提醒</string>
+    <string name="reminder_notification_no_content">（空白便签）</string>
+    <string name="reminder_permission_title">通知权限未开启</string>
+    <string name="reminder_permission_message">提醒以通知形式展示。请允许「便签」发送通知，否则到点后看不到提醒。</string>
+    <string name="reminder_permission_positive">去开启</string>
+    <string name="reminder_permission_denied">未授予通知权限，提醒不会显示</string>
+    <string name="reminder_exact_disabled">系统未允许精确闹钟，提醒可能延迟数分钟</string>
+    <string name="reminder_exact_title">精确提醒未开启</string>
+    <string name="reminder_exact_message">系统默认只允许近似时间提醒。开启「闹钟和提醒」后，便签提醒才能准点触发；不开启也可以设置，但可能延迟。</string>
+    <string name="reminder_exact_positive">去开启</string>
+    <string name="reminder_exact_negative">仍然设置</string>
+    <string name="reminder_time_passed">提醒时间必须晚于当前时间</string>
     <string name="note_link_tel">呼叫电话</string>
     <string name="note_link_email">发送邮件</string>
     <string name="note_link_web">浏览网页</string>

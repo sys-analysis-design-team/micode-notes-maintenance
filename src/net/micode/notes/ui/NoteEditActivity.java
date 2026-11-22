@@ -16,20 +16,21 @@
 
 package net.micode.notes.ui;
 
+import android.Manifest;
 import android.app.Activity;
-import android.app.AlarmManager;
 import android.app.AlertDialog;
-import android.app.PendingIntent;
 import android.app.SearchManager;
 import android.appwidget.AppWidgetManager;
-import android.content.ContentUris;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
 import android.graphics.Paint;
+import android.os.Build;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
+import android.provider.Settings;
 import android.text.Spannable;
 import android.text.SpannableString;
 import android.text.TextUtils;
@@ -58,6 +59,8 @@ import net.micode.notes.data.Notes.TextNote;
 import net.micode.notes.model.WorkingNote;
 import net.micode.notes.model.WorkingNote.NoteSettingChangedListener;
 import net.micode.notes.tool.DataUtils;
+import net.micode.notes.tool.ReminderNotifier;
+import net.micode.notes.tool.ReminderScheduler;
 import net.micode.notes.tool.ResourceParser;
 import net.micode.notes.tool.ResourceParser.TextAppearanceResources;
 import net.micode.notes.ui.DateTimePickerDialog.OnDateTimeSetListener;
@@ -138,6 +141,9 @@ public class NoteEditActivity extends Activity implements OnClickListener,
     private int mFontSizeId;
 
     private static final String PREFERENCE_FONT_SIZE = "pref_font_size";
+
+    /** M4：Android 13+ 通知权限请求码。 */
+    private static final int REQUEST_NOTIFICATION_PERMISSION = 201;
 
     private static final int SHORTCUT_ICON_TITLE_MAX_LEN = 10;
 
@@ -497,11 +503,8 @@ public class NoteEditActivity extends Activity implements OnClickListener,
         } else {
             menu.findItem(R.id.menu_list_mode).setTitle(R.string.menu_list_mode);
         }
-        if (mWorkingNote.hasClockAlert()) {
-            menu.findItem(R.id.menu_alert).setVisible(false);
-        } else {
-            menu.findItem(R.id.menu_delete_remind).setVisible(false);
-        }
+        // M4：已有提醒时仍保留「提醒我」，用于改期；「删除提醒」只在存在提醒时出现。
+        menu.findItem(R.id.menu_delete_remind).setVisible(mWorkingNote.hasClockAlert());
         return true;
     }
 
@@ -545,13 +548,101 @@ public class NoteEditActivity extends Activity implements OnClickListener,
     }
 
     private void setReminder() {
-        DateTimePickerDialog d = new DateTimePickerDialog(this, System.currentTimeMillis());
+        if (!ReminderNotifier.canPostNotifications(this)) {
+            showNotificationPermissionDialog();
+            return;
+        }
+        if (!ReminderScheduler.canScheduleExactAlarms(this)) {
+            showExactAlarmDialog();
+            return;
+        }
+        showReminderDatePicker();
+    }
+
+    private void showReminderDatePicker() {
+        long initialDate = mWorkingNote.hasClockAlert()
+                ? mWorkingNote.getAlertDate() : System.currentTimeMillis();
+        DateTimePickerDialog d = new DateTimePickerDialog(this, initialDate);
         d.setOnDateTimeSetListener(new OnDateTimeSetListener() {
             public void OnDateTimeSet(AlertDialog dialog, long date) {
-                mWorkingNote.setAlertDate(date	, true);
+                if (date <= System.currentTimeMillis()) {
+                    showToast(R.string.reminder_time_passed);
+                    return;
+                }
+                mWorkingNote.setAlertDate(date, true);
             }
         });
         d.show();
+    }
+
+    /**
+     * M4：提醒依赖通知展示。权限被拒绝时说明原因，并引导到正确的系统入口：
+     * Android 13+ 未授权走运行时权限弹窗，已授权但通知被关闭走应用通知设置。
+     */
+    private void showNotificationPermissionDialog() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle(R.string.reminder_permission_title);
+        builder.setMessage(R.string.reminder_permission_message);
+        builder.setPositiveButton(R.string.reminder_permission_positive,
+                new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int which) {
+                        requestNotificationPermission();
+                    }
+                });
+        builder.setNegativeButton(android.R.string.cancel, null);
+        builder.show();
+    }
+
+    /**
+     * M4：Android 12+ 默认不授予精确闹钟。说明开启方法；用户拒绝时仍允许设置，
+     * 但提醒会走非精确通道，可能延迟。
+     */
+    private void showExactAlarmDialog() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle(R.string.reminder_exact_title);
+        builder.setMessage(R.string.reminder_exact_message);
+        builder.setPositiveButton(R.string.reminder_exact_positive,
+                new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int which) {
+                        Intent intent = new Intent(Settings.ACTION_REQUEST_SCHEDULE_EXACT_ALARM,
+                                android.net.Uri.parse("package:" + getPackageName()));
+                        startActivity(intent);
+                    }
+                });
+        builder.setNegativeButton(R.string.reminder_exact_negative,
+                new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int which) {
+                        showReminderDatePicker();
+                    }
+                });
+        builder.show();
+    }
+
+    private void requestNotificationPermission() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU
+                && checkSelfPermission(Manifest.permission.POST_NOTIFICATIONS)
+                        != PackageManager.PERMISSION_GRANTED) {
+            requestPermissions(new String[] { Manifest.permission.POST_NOTIFICATIONS },
+                    REQUEST_NOTIFICATION_PERMISSION);
+            return;
+        }
+        Intent intent = new Intent(Settings.ACTION_APP_NOTIFICATION_SETTINGS);
+        intent.putExtra(Settings.EXTRA_APP_PACKAGE, getPackageName());
+        startActivity(intent);
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, String[] permissions,
+            int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        if (requestCode != REQUEST_NOTIFICATION_PERMISSION) {
+            return;
+        }
+        if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+            setReminder();
+        } else {
+            showToast(R.string.reminder_permission_denied);
+        }
     }
 
     /**
@@ -590,6 +681,9 @@ public class NoteEditActivity extends Activity implements OnClickListener,
             if (!DataUtils.moveNotesToTrash(getContentResolver(), ids)) {
                 Log.e(TAG, "Move note to trash error");
             }
+            // M4：进回收站的便签不再提醒，同时清掉已经弹出的通知。
+            ReminderScheduler.cancel(this, id);
+            ReminderNotifier.cancel(this, id);
         }
         mWorkingNote.markDeleted(true);
     }
@@ -607,16 +701,19 @@ public class NoteEditActivity extends Activity implements OnClickListener,
             saveNote();
         }
         if (mWorkingNote.getNoteId() > 0) {
-            Intent intent = new Intent(this, AlarmReceiver.class);
-            intent.setData(ContentUris.withAppendedId(Notes.CONTENT_NOTE_URI, mWorkingNote.getNoteId()));
-            PendingIntent pendingIntent = PendingIntent.getBroadcast(this, 0, intent,
-                    PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
-            AlarmManager alarmManager = ((AlarmManager) getSystemService(ALARM_SERVICE));
+            long noteId = mWorkingNote.getNoteId();
             showAlertHeader();
-            if(!set) {
-                alarmManager.cancel(pendingIntent);
+            if (!set) {
+                ReminderScheduler.cancel(this, noteId);
+                ReminderNotifier.cancel(this, noteId);
+                showToast(R.string.delete_remind_time_message);
             } else {
-                alarmManager.set(AlarmManager.RTC_WAKEUP, date, pendingIntent);
+                // 缺少精确闹钟权限时自动降级为非精确闹钟，并明确告知可能延迟。
+                if (!ReminderScheduler.schedule(this, noteId, date)) {
+                    showToast(R.string.reminder_exact_disabled);
+                } else {
+                    showToast(R.string.set_remind_time_message);
+                }
             }
         } else {
             /**

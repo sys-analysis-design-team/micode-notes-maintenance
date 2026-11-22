@@ -69,6 +69,8 @@ import net.micode.notes.tool.BackupNote;
 import net.micode.notes.tool.BackupUtils;
 import net.micode.notes.tool.DataUtils;
 import net.micode.notes.tool.NoteBackupCodec;
+import net.micode.notes.tool.ReminderNotifier;
+import net.micode.notes.tool.ReminderScheduler;
 import net.micode.notes.tool.ResourceParser;
 import net.micode.notes.ui.NotesListAdapter.AppWidgetAttribute;
 import net.micode.notes.widget.NoteWidgetProvider_2x;
@@ -492,12 +494,12 @@ public class NotesListActivity extends Activity implements OnClickListener, OnIt
     }
 
     private void batchDelete() {
+        final HashSet<Long> deletedIds = mNotesListAdapter.getSelectedItemIds();
         new AsyncTask<Void, Void, HashSet<AppWidgetAttribute>>() {
             protected HashSet<AppWidgetAttribute> doInBackground(Void... unused) {
                 HashSet<AppWidgetAttribute> widgets = mNotesListAdapter.getSelectedWidget();
                 // M5：普通便签软删除进回收站，文件夹仍按原语义彻底删除。
-                if (!DataUtils.batchDeleteOrTrash(mContentResolver, mNotesListAdapter
-                        .getSelectedItemIds())) {
+                if (!DataUtils.batchDeleteOrTrash(mContentResolver, deletedIds)) {
                     Log.e(TAG, "Delete notes error, should not happens");
                 }
                 return widgets;
@@ -512,6 +514,11 @@ public class NotesListActivity extends Activity implements OnClickListener, OnIt
                             updateWidget(widget.widgetId, widget.widgetType);
                         }
                     }
+                }
+                // M4：被删除的便签不再提醒。
+                for (long id : deletedIds) {
+                    ReminderScheduler.cancel(NotesListActivity.this, id);
+                    ReminderNotifier.cancel(NotesListActivity.this, id);
                 }
                 mModeCallBack.finishActionMode();
             }

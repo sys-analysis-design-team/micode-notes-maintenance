@@ -10,7 +10,7 @@
 | M1 | 缺陷 | 老工程现代化与 Android 12–17 兼容；GTask 退役 | assembleDebug 成功；Pixel_7 可安装启动；新建/编辑/保存/搜索/删除/Widget 正常；旧同步入口不误导 | ✅（Widget 回归待做） |
 | M2 | 缺陷 | Provider 数据安全 + SQL 修复 + 测试 | 本应用 CRUD 正常；独立测试 App 无法读写 Provider；恶意 selection 不扩大结果；非法 URI 有确定行为 | ✅ |
 | M3 | 功能 | SAF 导出 UTF-8 TXT + JSON 完整备份/恢复 | 中文/Emoji 导出正确；≥20 条不同类型便签可备份恢复；坏 JSON/取消/空文件不破坏现有数据 | ✅ |
-| M4 | 缺陷 | 提醒与通知重构 | 可设置/修改/取消；通知可见、点击回跳；权限拒绝有说明；重启后恢复提醒 | ⬜ |
+| M4 | 缺陷 | 提醒与通知重构 | 可设置/修改/取消；通知可见、点击回跳；权限拒绝有说明；重启后恢复提醒 | ✅ |
 | M5 | 功能 | 回收站浏览/恢复/彻底删除 | 删除后普通列表不可见、回收站可见；恢复正文完整；彻底删除需确认；触发器计数正常 | ✅ |
 | M6 | 功能 | AI 摘要 + 待办提取 | 真实 LLM 至少成功一次；无 Key/断网/超时/坏 JSON 不崩溃；用户确认后才写入；Key 不入库 | ⬜ |
 | M7 | 功能 | 深色模式（选做） | 系统切换后列表/编辑/回收站/AI/提醒可读；无白底白字 | ⬜ 12/6 决定 |
@@ -38,6 +38,17 @@
 - 列表菜单新增「备份到 JSON 文件」「从 JSON 文件恢复」，保存/打开走 SAF，移除 `WRITE_EXTERNAL_STORAGE` 权限。
 - 设备验证（Pixel_7 / Android 17）：22 条便签 + 2 个文件夹；文本导出 2.45 KB，中文与 🥛🥚🍞 无乱码；JSON 6.74 KB，含 24 条记录（22 便签 + 2 文件夹）；恢复后数据库 44 条便签 / 4 个文件夹，文件夹计数 10/6 保持正确；坏 JSON 与 0 字节文件均提示错误，数据库保持 22/2 不变。
 - 证据：`logs/m3_seed_list.png`、`m3_full_text_saved.png`、`m3_full_restore_done.png`、`m3_bad_restore.png`、`m3_empty_restore.png`、`m3_full_backup.json`、`m3_full_export.txt`。
+
+### M4 完成情况
+
+- 旧实现用 `AlarmManager.set` + 直接启动 `AlarmAlertActivity`，在 Android 12+ 既不定时，也会被后台启动 Activity 限制拦截；全屏提醒页删除。
+- 新增 `ReminderScheduler`：统一设置/取消/重建提醒；有 `SCHEDULE_EXACT_ALARM` 时用 `setExactAndAllowWhileIdle`，无权限时降级 `setAndAllowWhileIdle` 并返回状态供 UI 提示。
+- 新增 `ReminderNotifier`：Android 8+ 通知渠道（高优先级、闹钟铃声），通知含摘要、`BigTextStyle`、「查看」「知道了」动作；点击回编辑页，通知权限被关闭时返回失败。
+- `AlarmReceiver` 改为只发通知，并在发通知前检查便签是否已删除/进回收站；`AlarmInitReceiver` 在开机、应用升级、时间/时区变化后从数据库重建未来提醒。
+- 编辑页：已有提醒时同时保留「提醒我」与「删除提醒」，支持直接改期；设置时校验过去时间；通知权限被拒先说明再请求，精确闹钟未授权时说明并提供系统设置入口，拒绝后仍可用非精确提醒。
+- 删除便签（单条或批量）同步取消闹钟并清除通知。
+- 设备验证（Pixel_7 / Android 17）：18:07 提醒按非精确窗口在 18:08 弹出通知，标题/摘要/两个动作正常；点击通知回到对应便签；授予「闹钟和提醒」后 `dumpsys alarm` 显示 `window=0 exactAllowReason=permission`；重启后日志 `Rescheduled 1 reminders`，19:07 闹钟与精确标志恢复；删除提醒后仅剩取消记录。
+- 证据：`logs/m4_perm_dialog.png`、`m4_notification.png`、`m4_notification_click.png`、`m4_exact_dialog.png`、`m4_exact_settings.png`、`m4_exact_set.png`、`m4_cancelled.png`。
 
 ### M5 完成情况
 

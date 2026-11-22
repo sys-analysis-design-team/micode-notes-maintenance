@@ -30,6 +30,8 @@
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
     <!-- Android 13+ 通知运行时权限；M4 提醒功能会申请 -->
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+    <!-- M4：Android 12+ 精确闹钟；未授权时自动降级为非精确提醒并提示用户 -->
+    <uses-permission android:name="android.permission.SCHEDULE_EXACT_ALARM" />
 
     <application
         android:icon="@drawable/icon_app"
@@ -125,28 +127,23 @@
                 android:resource="@xml/widget_4x_info" />
         </receiver>
 
+        <!-- M4：开机、应用升级、系统时间/时区变化后重建提醒 -->
         <receiver
             android:name=".ui.AlarmInitReceiver"
             android:exported="true" >
             <intent-filter>
                 <action android:name="android.intent.action.BOOT_COMPLETED" />
+                <action android:name="android.intent.action.MY_PACKAGE_REPLACED" />
+                <action android:name="android.intent.action.TIME_SET" />
+                <action android:name="android.intent.action.TIMEZONE_CHANGED" />
             </intent-filter>
         </receiver>
 
         <!-- 仅由本应用闹钟 PendingIntent 触发，不对外暴露 -->
         <receiver
             android:name="net.micode.notes.ui.AlarmReceiver"
-            android:exported="false"
-            android:process=":remote" >
+            android:exported="false" >
         </receiver>
-
-        <activity
-            android:name=".ui.AlarmAlertActivity"
-            android:exported="false"
-            android:label="@string/app_name"
-            android:launchMode="singleInstance"
-            android:theme="@android:style/Theme.Holo.Wallpaper.NoTitleBar" >
-        </activity>
 
         <activity
             android:name="net.micode.notes.ui.NotesPreferenceActivity"

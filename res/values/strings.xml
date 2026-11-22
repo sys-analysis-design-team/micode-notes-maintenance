@@ -31,6 +31,21 @@
     <string name="format_datetime_mdhm">MMMd kk:mm</string>
     <string name="notealert_ok">Got it</string>
     <string name="notealert_enter">Take a look</string>
+    <!-- M4 reminder notification -->
+    <string name="reminder_channel_name">Note reminders</string>
+    <string name="reminder_channel_description">Notifications when a note reminder is due</string>
+    <string name="reminder_notification_title">Note reminder</string>
+    <string name="reminder_notification_no_content">(Empty note)</string>
+    <string name="reminder_permission_title">Notifications are off</string>
+    <string name="reminder_permission_message">Reminders appear as notifications. Allow notifications for Notes, otherwise the reminder will not be visible when it is due.</string>
+    <string name="reminder_permission_positive">Allow</string>
+    <string name="reminder_permission_denied">Notification permission denied; reminders will not be shown</string>
+    <string name="reminder_exact_disabled">Exact alarms are not allowed; the reminder may be delayed a few minutes</string>
+    <string name="reminder_exact_title">Exact reminders are off</string>
+    <string name="reminder_exact_message">Android only allows approximate reminders by default. Allow \"Alarms &amp; reminders\" for Notes to trigger on time; otherwise the reminder may be delayed.</string>
+    <string name="reminder_exact_positive">Open settings</string>
+    <string name="reminder_exact_negative">Set anyway</string>
+    <string name="reminder_time_passed">Reminder time must be later than now</string>
     <string name="note_link_tel">Call</string>
     <string name="note_link_email">Send email</string>
     <string name="note_link_web">Browse web</string>
