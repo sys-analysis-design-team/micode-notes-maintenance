@@ -47,27 +47,33 @@ public class Contact {
 
         String selection = CALLER_ID_SELECTION.replace("+",
                 PhoneNumberUtils.toCallerIDMinMatch(phoneNumber));
-        Cursor cursor = context.getContentResolver().query(
-                Data.CONTENT_URI,
-                new String [] { Phone.DISPLAY_NAME },
-                selection,
-                new String[] { phoneNumber },
-                null);
+        Cursor cursor = null;
+        try {
+            cursor = context.getContentResolver().query(
+                    Data.CONTENT_URI,
+                    new String [] { Phone.DISPLAY_NAME },
+                    selection,
+                    new String[] { phoneNumber },
+                    null);
 
-        if (cursor != null && cursor.moveToFirst()) {
-            try {
+            if (cursor != null && cursor.moveToFirst()) {
                 String name = cursor.getString(0);
                 sContactCache.put(phoneNumber, name);
                 return name;
-            } catch (IndexOutOfBoundsException e) {
-                Log.e(TAG, " Cursor get string error " + e.toString());
-                return null;
-            } finally {
-                cursor.close();
             }
-        } else {
             Log.d(TAG, "No contact matched with number:" + phoneNumber);
             return null;
+        } catch (IndexOutOfBoundsException e) {
+            Log.e(TAG, " Cursor get string error " + e.toString());
+            return null;
+        } catch (SecurityException e) {
+            // Android 6.0+ 读取联系人需要运行时权限；未授权时退化为只显示号码，不能崩溃
+            Log.w(TAG, "Read contacts denied, fall back to phone number", e);
+            return null;
+        } finally {
+            if (cursor != null) {
+                cursor.close();
+            }
         }
     }
 }

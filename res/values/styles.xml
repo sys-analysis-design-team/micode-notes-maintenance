@@ -58,12 +58,11 @@
         <item name="android:textColor">@color/secondary_text_dark</item>
     </style>
 
+    <!--
+        维护说明：原主题把 ActionBar 设为 gone，依赖早期 MIUI 手机的 MENU 实体键。
+        现代 Android 没有菜单键，导致设置/搜索/提醒等入口全部不可达，这里改回标准
+        Holo.Light 顶部栏，由右侧溢出菜单承载原有功能。
+    -->
     <style name="NoteTheme" parent="@android:style/Theme.Holo.Light">
-        <item name="android:actionBarStyle">@style/NoteActionBarStyle</item>
-    </style>
-
-    <style name="NoteActionBarStyle" parent="@android:style/Widget.Holo.Light.ActionBar.Solid">
-        <item name="android:displayOptions" />
-        <item name="android:visibility">gone</item>
     </style>
 </resources>

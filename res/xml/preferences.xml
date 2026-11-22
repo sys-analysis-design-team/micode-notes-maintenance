@@ -17,10 +17,7 @@
 
 <PreferenceScreen
     xmlns:android="http://schemas.android.com/apk/res/android">
-    <PreferenceCategory
-        android:key="pref_sync_account_key">
-    </PreferenceCategory>
-
+    <!-- GTask 同步已退役，不再提供账号与同步设置 -->
     <PreferenceCategory>
         <CheckBoxPreference
             android:key="pref_key_bg_random_appear"

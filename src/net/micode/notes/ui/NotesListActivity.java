@@ -63,7 +63,6 @@ import android.widget.Toast;
 import net.micode.notes.R;
 import net.micode.notes.data.Notes;
 import net.micode.notes.data.Notes.NoteColumns;
-import net.micode.notes.gtask.remote.GTaskSyncService;
 import net.micode.notes.model.WorkingNote;
 import net.micode.notes.tool.BackupUtils;
 import net.micode.notes.tool.DataUtils;
@@ -759,9 +758,6 @@ public class NotesListActivity extends Activity implements OnClickListener, OnIt
         menu.clear();
         if (mState == ListEditState.NOTE_LIST) {
             getMenuInflater().inflate(R.menu.note_list, menu);
-            // set sync or sync_cancel
-            menu.findItem(R.id.menu_sync).setTitle(
-                    GTaskSyncService.isSyncing() ? R.string.menu_sync_cancel : R.string.menu_sync);
         } else if (mState == ListEditState.SUB_FOLDER) {
             getMenuInflater().inflate(R.menu.sub_folder, menu);
         } else if (mState == ListEditState.CALL_RECORD_FOLDER) {
@@ -779,16 +775,6 @@ public class NotesListActivity extends Activity implements OnClickListener, OnIt
             showCreateOrModifyFolderDialog(true);
         } else if (itemId == R.id.menu_export_text) {
             exportNoteToText();
-        } else if (itemId == R.id.menu_sync) {
-            if (isSyncMode()) {
-                if (TextUtils.equals(item.getTitle(), getString(R.string.menu_sync))) {
-                    GTaskSyncService.startSync(this);
-                } else {
-                    GTaskSyncService.cancelSync(this);
-                }
-            } else {
-                startPreferenceActivity();
-            }
         } else if (itemId == R.id.menu_setting) {
             startPreferenceActivity();
         } else if (itemId == R.id.menu_new_note) {
