@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- 回收站列表：空状态与列表互斥显示 -->
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@android:color/white">
+
+    <ListView
+        android:id="@+id/trash_list"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:divider="#22000000"
+        android:dividerHeight="1dp" />
+
+    <TextView
+        android:id="@+id/trash_empty"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:text="@string/trash_empty"
+        android:textColor="#888888"
+        android:textSize="16sp"
+        android:visibility="gone" />
+</FrameLayout>

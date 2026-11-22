@@ -80,6 +80,147 @@ public class DataUtils {
         resolver.update(ContentUris.withAppendedId(Notes.CONTENT_NOTE_URI, id), values, null, null);
     }
 
+    /**
+     * 把普通便签移入回收站，并记录原文件夹，供恢复时还原位置。
+     * 文件夹不在这里处理：删除文件夹仍是彻底删除（其子便签由数据库触发器一并删除）。
+     */
+    public static boolean moveNotesToTrash(ContentResolver resolver, HashSet<Long> ids) {
+        if (ids == null || ids.isEmpty()) {
+            return true;
+        }
+        ArrayList<ContentProviderOperation> operationList = new ArrayList<ContentProviderOperation>();
+        for (long id : ids) {
+            if (id <= 0) {
+                Log.e(TAG, "Skip invalid note id: " + id);
+                continue;
+            }
+            long origin = getNoteParent(resolver, id);
+            ContentProviderOperation.Builder builder = ContentProviderOperation
+                    .newUpdate(ContentUris.withAppendedId(Notes.CONTENT_NOTE_URI, id));
+            builder.withValue(NoteColumns.ORIGIN_PARENT_ID, origin);
+            builder.withValue(NoteColumns.PARENT_ID, Notes.ID_TRASH_FOLER);
+            builder.withValue(NoteColumns.LOCAL_MODIFIED, 1);
+            operationList.add(builder.build());
+        }
+        return applyOperations(resolver, operationList);
+    }
+
+    /**
+     * 列表批量删除：普通便签进回收站，文件夹保持彻底删除语义。
+     */
+    public static boolean batchDeleteOrTrash(ContentResolver resolver, HashSet<Long> ids) {
+        if (ids == null || ids.isEmpty()) {
+            return true;
+        }
+        HashSet<Long> notes = new HashSet<Long>();
+        HashSet<Long> folders = new HashSet<Long>();
+        for (long id : ids) {
+            if (getNoteType(resolver, id) == Notes.TYPE_NOTE) {
+                notes.add(id);
+            } else {
+                folders.add(id);
+            }
+        }
+        boolean result = true;
+        if (!folders.isEmpty()) {
+            result = batchDeleteNotes(resolver, folders);
+        }
+        if (!notes.isEmpty()) {
+            result = moveNotesToTrash(resolver, notes) && result;
+        }
+        return result;
+    }
+
+    private static int getNoteType(ContentResolver resolver, long id) {
+        Cursor cursor = resolver.query(ContentUris.withAppendedId(Notes.CONTENT_NOTE_URI, id),
+                new String[] { NoteColumns.TYPE }, null, null, null);
+        if (cursor == null) {
+            return -1;
+        }
+        try {
+            return cursor.moveToFirst() ? cursor.getInt(0) : -1;
+        } finally {
+            cursor.close();
+        }
+    }
+
+    /**
+     * 从回收站恢复便签：原文件夹仍存在且不在回收站时回到原位置，否则回到根目录。
+     */
+    public static boolean restoreNoteFromTrash(ContentResolver resolver, long id) {
+        Cursor cursor = resolver.query(ContentUris.withAppendedId(Notes.CONTENT_NOTE_URI, id),
+                new String[] { NoteColumns.ORIGIN_PARENT_ID },
+                NoteColumns.PARENT_ID + "=? AND " + NoteColumns.TYPE + "=?",
+                new String[] { String.valueOf(Notes.ID_TRASH_FOLER),
+                        String.valueOf(Notes.TYPE_NOTE) }, null);
+        if (cursor == null) {
+            return false;
+        }
+        long origin;
+        try {
+            if (!cursor.moveToFirst()) {
+                return false;
+            }
+            origin = cursor.getLong(0);
+        } finally {
+            cursor.close();
+        }
+        if (origin <= 0 || !isActiveFolder(resolver, origin)) {
+            origin = 0;
+        }
+        ContentValues values = new ContentValues();
+        values.put(NoteColumns.PARENT_ID, origin);
+        values.put(NoteColumns.ORIGIN_PARENT_ID, 0);
+        values.put(NoteColumns.LOCAL_MODIFIED, 1);
+        return resolver.update(ContentUris.withAppendedId(Notes.CONTENT_NOTE_URI, id),
+                values, null, null) > 0;
+    }
+
+    private static long getNoteParent(ContentResolver resolver, long id) {
+        Cursor cursor = resolver.query(ContentUris.withAppendedId(Notes.CONTENT_NOTE_URI, id),
+                new String[] { NoteColumns.PARENT_ID }, null, null, null);
+        if (cursor == null) {
+            return 0;
+        }
+        try {
+            return cursor.moveToFirst() ? cursor.getLong(0) : 0;
+        } finally {
+            cursor.close();
+        }
+    }
+
+    private static boolean isActiveFolder(ContentResolver resolver, long folderId) {
+        Cursor cursor = resolver.query(ContentUris.withAppendedId(Notes.CONTENT_NOTE_URI,
+                folderId), new String[] { NoteColumns.ID },
+                NoteColumns.TYPE + "=? AND " + NoteColumns.PARENT_ID + "<>?",
+                new String[] { String.valueOf(Notes.TYPE_FOLDER),
+                        String.valueOf(Notes.ID_TRASH_FOLER) }, null);
+        if (cursor == null) {
+            return false;
+        }
+        try {
+            return cursor.moveToFirst();
+        } finally {
+            cursor.close();
+        }
+    }
+
+    private static boolean applyOperations(ContentResolver resolver,
+            ArrayList<ContentProviderOperation> operationList) {
+        if (operationList.isEmpty()) {
+            return true;
+        }
+        try {
+            ContentProviderResult[] results = resolver.applyBatch(Notes.AUTHORITY, operationList);
+            return results != null && results.length > 0 && results[0] != null;
+        } catch (RemoteException e) {
+            Log.e(TAG, String.format("%s: %s", e.toString(), e.getMessage()));
+        } catch (OperationApplicationException e) {
+            Log.e(TAG, String.format("%s: %s", e.toString(), e.getMessage()));
+        }
+        return false;
+    }
+
     public static boolean batchMoveToFolder(ContentResolver resolver, HashSet<Long> ids,
             long folderId) {
         if (ids == null) {

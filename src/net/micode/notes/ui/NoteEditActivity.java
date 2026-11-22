@@ -586,14 +586,9 @@ public class NoteEditActivity extends Activity implements OnClickListener,
             } else {
                 Log.d(TAG, "Wrong note id, should not happen");
             }
-            if (!isSyncMode()) {
-                if (!DataUtils.batchDeleteNotes(getContentResolver(), ids)) {
-                    Log.e(TAG, "Delete Note error");
-                }
-            } else {
-                if (!DataUtils.batchMoveToFolder(getContentResolver(), ids, Notes.ID_TRASH_FOLER)) {
-                    Log.e(TAG, "Move notes to trash folder error, should not happens");
-                }
+            // M5：删除改为软删除，保留正文供回收站恢复。
+            if (!DataUtils.moveNotesToTrash(getContentResolver(), ids)) {
+                Log.e(TAG, "Move note to trash error");
             }
         }
         mWorkingNote.markDeleted(true);

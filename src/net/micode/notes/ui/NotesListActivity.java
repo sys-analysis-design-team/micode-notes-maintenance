@@ -495,20 +495,10 @@ public class NotesListActivity extends Activity implements OnClickListener, OnIt
         new AsyncTask<Void, Void, HashSet<AppWidgetAttribute>>() {
             protected HashSet<AppWidgetAttribute> doInBackground(Void... unused) {
                 HashSet<AppWidgetAttribute> widgets = mNotesListAdapter.getSelectedWidget();
-                if (!isSyncMode()) {
-                    // if not synced, delete notes directly
-                    if (DataUtils.batchDeleteNotes(mContentResolver, mNotesListAdapter
-                            .getSelectedItemIds())) {
-                    } else {
-                        Log.e(TAG, "Delete notes error, should not happens");
-                    }
-                } else {
-                    // in sync mode, we'll move the deleted note into the trash
-                    // folder
-                    if (!DataUtils.batchMoveToFolder(mContentResolver, mNotesListAdapter
-                            .getSelectedItemIds(), Notes.ID_TRASH_FOLER)) {
-                        Log.e(TAG, "Move notes to trash folder error, should not happens");
-                    }
+                // M5：普通便签软删除进回收站，文件夹仍按原语义彻底删除。
+                if (!DataUtils.batchDeleteOrTrash(mContentResolver, mNotesListAdapter
+                        .getSelectedItemIds())) {
+                    Log.e(TAG, "Delete notes error, should not happens");
                 }
                 return widgets;
             }
@@ -807,6 +797,8 @@ public class NotesListActivity extends Activity implements OnClickListener, OnIt
             intent.addCategory(Intent.CATEGORY_OPENABLE);
             intent.setType("*/*");
             startActivityForResult(intent, REQUEST_CODE_RESTORE_JSON);
+        } else if (itemId == R.id.menu_trash) {
+            startActivity(new Intent(this, TrashActivity.class));
         } else if (itemId == R.id.menu_setting) {
             startPreferenceActivity();
         } else if (itemId == R.id.menu_new_note) {

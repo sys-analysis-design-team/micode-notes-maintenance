@@ -43,6 +43,7 @@
     <string name="menu_create_folder">New Folder</string>
     <string name="menu_export_text">Export text</string>
     <string name="menu_backup_json">Backup to JSON</string>
+    <string name="menu_trash">Trash</string>
     <string name="menu_restore_json">Restore from JSON</string>
     <string name="menu_sync">Sync</string>
     <string name="menu_sync_cancel">Cancel syncing</string>
@@ -95,6 +96,22 @@
     <string name="restore_done">Restored %1$d notes and %2$d folders.</string>
     <string name="restore_failed">Restore failed: %1$s</string>
     <string name="restore_invalid">Invalid backup file: %1$s</string>
+    <!-- Trash -->
+    <string name="trash_title">Trash</string>
+    <string name="trash_empty">Trash is empty</string>
+    <string name="trash_untitled">(Untitled)</string>
+    <string name="trash_restore">Restore</string>
+    <string name="trash_delete_forever">Delete permanently</string>
+    <string name="trash_delete_confirm_title">Delete permanently?</string>
+    <string name="trash_delete_confirm_message">The note cannot be recovered after this operation.</string>
+    <string name="trash_restored">Note restored</string>
+    <string name="trash_restore_failed">Restore failed</string>
+    <string name="trash_deleted">Note deleted permanently</string>
+    <string name="trash_delete_failed">Delete failed</string>
+    <string name="trash_clear">Empty trash</string>
+    <string name="trash_clear_confirm">Delete all notes in the trash permanently?</string>
+    <string name="trash_clearing">Emptying trash…</string>
+    <string name="trash_cleared">Trash emptied</string>
     <!-- Sync -->
     <string name="ticker_syncing">Syncing notes...</string>
     <string name="ticker_success">Sync is successful</string>
