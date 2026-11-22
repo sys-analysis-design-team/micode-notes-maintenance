@@ -19,6 +19,7 @@ package net.micode.notes.ui;
 import android.Manifest;
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.app.ProgressDialog;
 import android.app.SearchManager;
 import android.appwidget.AppWidgetManager;
 import android.content.Context;
@@ -27,6 +28,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.graphics.Paint;
+import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
@@ -58,7 +60,11 @@ import net.micode.notes.data.Notes;
 import net.micode.notes.data.Notes.TextNote;
 import net.micode.notes.model.WorkingNote;
 import net.micode.notes.model.WorkingNote.NoteSettingChangedListener;
+import net.micode.notes.tool.AiAnalysis;
+import net.micode.notes.tool.AiClient;
+import net.micode.notes.tool.AiSettings;
 import net.micode.notes.tool.DataUtils;
+import net.micode.notes.tool.LocalNoteAnalyzer;
 import net.micode.notes.tool.ReminderNotifier;
 import net.micode.notes.tool.ReminderScheduler;
 import net.micode.notes.tool.ResourceParser;
@@ -70,6 +76,7 @@ import net.micode.notes.widget.NoteWidgetProvider_4x;
 
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -539,6 +546,8 @@ public class NoteEditActivity extends Activity implements OnClickListener,
             sendTo(this, mWorkingNote.getContent());
         } else if (itemId == R.id.menu_send_to_desktop) {
             sendToDesktop();
+        } else if (itemId == R.id.menu_ai_analyze) {
+            analyzeNoteWithAi();
         } else if (itemId == R.id.menu_alert) {
             setReminder();
         } else if (itemId == R.id.menu_delete_remind) {
@@ -654,6 +663,146 @@ public class NoteEditActivity extends Activity implements OnClickListener,
         intent.putExtra(Intent.EXTRA_TEXT, info);
         intent.setType("text/plain");
         context.startActivity(intent);
+    }
+
+    /**
+     * M6：在线分析便签；未配置、断网、超时或坏 JSON 都回退到本地规则。
+     * 结果先预览，用户确认后才写入正文。
+     */
+    private void analyzeNoteWithAi() {
+        getWorkingText();
+        final String content = mWorkingNote.getContent();
+        if (TextUtils.isEmpty(content) || content.trim().length() == 0) {
+            showToast(R.string.ai_empty_note);
+            return;
+        }
+        final AiSettings settings = AiSettings.load(this);
+        if (!settings.isConfigured()) {
+            showAiSetupDialog(content);
+            return;
+        }
+
+        final ProgressDialog progress = new ProgressDialog(this);
+        progress.setMessage(getString(R.string.ai_analyzing_message));
+        progress.setCancelable(false);
+        progress.show();
+
+        new AsyncTask<Void, Void, AiAnalysis>() {
+            private Exception mError;
+
+            @Override
+            protected AiAnalysis doInBackground(Void... params) {
+                try {
+                    return AiClient.analyze(settings, content);
+                } catch (Exception e) {
+                    mError = e;
+                    return null;
+                }
+            }
+
+            @Override
+            protected void onPostExecute(AiAnalysis result) {
+                if (isFinishing()) {
+                    return;
+                }
+                progress.dismiss();
+                if (result != null) {
+                    showAiResultDialog(result);
+                } else {
+                    Log.w(TAG, "AI analyze failed: "
+                            + (mError == null ? "unknown" : mError.getClass().getSimpleName()));
+                    showAiResultDialog(LocalNoteAnalyzer.analyze(content));
+                }
+            }
+        }.execute();
+    }
+
+    private void showAiSetupDialog(final String content) {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle(R.string.ai_not_configured_title);
+        builder.setMessage(R.string.ai_not_configured_message);
+        builder.setPositiveButton(R.string.ai_configure,
+                new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int which) {
+                        startActivity(new Intent(NoteEditActivity.this,
+                                AiSettingsActivity.class));
+                    }
+                });
+        builder.setNeutralButton(R.string.ai_offline_analyze,
+                new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int which) {
+                        showAiResultDialog(LocalNoteAnalyzer.analyze(content));
+                    }
+                });
+        builder.setNegativeButton(android.R.string.cancel, null);
+        builder.show();
+    }
+
+    private void showAiResultDialog(final AiAnalysis result) {
+        StringBuilder body = new StringBuilder();
+        if (!result.isFromAi()) {
+            body.append(getString(R.string.ai_result_offline_reason)).append("\n\n");
+        }
+        body.append(getString(R.string.ai_result_summary_label)).append("\n")
+                .append(result.getSummary()).append("\n\n")
+                .append(getString(R.string.ai_result_todos_label)).append("\n");
+        List<String> todos = result.getTodos();
+        if (todos.isEmpty()) {
+            body.append(getString(R.string.ai_result_no_todos));
+        } else {
+            for (String todo : todos) {
+                body.append(TAG_UNCHECKED).append(" ").append(todo).append("\n");
+            }
+        }
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle(result.isFromAi()
+                ? R.string.ai_result_title_online : R.string.ai_result_title_offline);
+        builder.setMessage(body.toString().trim());
+        builder.setPositiveButton(R.string.ai_insert,
+                new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int which) {
+                        insertAiAnalysis(result);
+                    }
+                });
+        builder.setNeutralButton(R.string.ai_configure,
+                new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int which) {
+                        startActivity(new Intent(NoteEditActivity.this,
+                                AiSettingsActivity.class));
+                    }
+                });
+        builder.setNegativeButton(android.R.string.cancel, null);
+        builder.show();
+    }
+
+    private void insertAiAnalysis(AiAnalysis result) {
+        getWorkingText();
+        String existing = mWorkingNote.getContent();
+        if (existing == null) {
+            existing = "";
+        }
+        StringBuilder addition = new StringBuilder();
+        if (existing.trim().length() > 0) {
+            addition.append("\n\n");
+        }
+        addition.append(getString(R.string.ai_insert_summary_header)).append("\n")
+                .append(result.getSummary());
+        if (!result.getTodos().isEmpty()) {
+            addition.append("\n\n").append(getString(R.string.ai_insert_todos_header));
+            for (String todo : result.getTodos()) {
+                addition.append("\n").append(TAG_UNCHECKED).append(" ").append(todo);
+            }
+        }
+        String newText = existing + addition;
+        mWorkingNote.setWorkingText(newText);
+        if (mWorkingNote.getCheckListMode() == TextNote.MODE_CHECK_LIST) {
+            switchToListMode(newText);
+        } else {
+            mNoteEditor.setText(newText);
+            mNoteEditor.setSelection(newText.length());
+        }
+        saveNote();
+        showToast(R.string.ai_insert_done);
     }
 
     private void createNewNote() {

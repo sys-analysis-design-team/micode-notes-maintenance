@@ -806,6 +806,8 @@ public class NotesListActivity extends Activity implements OnClickListener, OnIt
             startActivityForResult(intent, REQUEST_CODE_RESTORE_JSON);
         } else if (itemId == R.id.menu_trash) {
             startActivity(new Intent(this, TrashActivity.class));
+        } else if (itemId == R.id.menu_ai_settings) {
+            startActivity(new Intent(this, AiSettingsActivity.class));
         } else if (itemId == R.id.menu_setting) {
             startPreferenceActivity();
         } else if (itemId == R.id.menu_new_note) {

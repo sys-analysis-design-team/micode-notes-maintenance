@@ -12,7 +12,7 @@
 | M3 | 功能 | SAF 导出 UTF-8 TXT + JSON 完整备份/恢复 | 中文/Emoji 导出正确；≥20 条不同类型便签可备份恢复；坏 JSON/取消/空文件不破坏现有数据 | ✅ |
 | M4 | 缺陷 | 提醒与通知重构 | 可设置/修改/取消；通知可见、点击回跳；权限拒绝有说明；重启后恢复提醒 | ✅ |
 | M5 | 功能 | 回收站浏览/恢复/彻底删除 | 删除后普通列表不可见、回收站可见；恢复正文完整；彻底删除需确认；触发器计数正常 | ✅ |
-| M6 | 功能 | AI 摘要 + 待办提取 | 真实 LLM 至少成功一次；无 Key/断网/超时/坏 JSON 不崩溃；用户确认后才写入；Key 不入库 | ⬜ |
+| M6 | 功能 | AI 摘要 + 待办提取 | 真实 LLM 至少成功一次；无 Key/断网/超时/坏 JSON 不崩溃；用户确认后才写入；Key 不入库 | ✅ |
 | M7 | 功能 | 深色模式（选做） | 系统切换后列表/编辑/回收站/AI/提醒可读；无白底白字 | ⬜ 12/6 决定 |
 
 ### M1 完成情况
@@ -57,6 +57,18 @@
 - 恢复时若原文件夹仍存在且不在回收站，回到原文件夹；否则回到根目录。
 - 设备验证（Pixel_7）：根目录便签删除后列表消失、回收站可见，恢复后回到列表；文件夹内便签删除后文件夹计数 10→9，恢复后 9→10；彻底删除后数据库 `data` 行随触发器删除，回收站为空。
 - 证据：`logs/m5_after_delete.png`、`m5_trash_list.png`、`m5_restored.png`、`m5_folder_after_delete.png`、`m5_folder_restored.png`、`m5_perm_deleted.png`。
+
+### M6 完成情况
+
+- 新增 `AiAnalysis`（不可变结果）、`AiResultParser`（容错解析：剥离 Markdown 围栏与前后说明，只取首个 `{` 到最后一个 `}`；摘要限 200 字、待办最多 5 条并去重/去项目符号）、`LocalNoteAnalyzer`（离线规则：前两行作摘要，勾选清单与关键词行提取待办）。
+- 新增 `AiSettings`：接口地址/模型/Key 存应用私有 `SharedPreferences`，默认 `https://api.deepseek.com/chat/completions` + `deepseek-chat`；Key 不进 SQLite、不进备份 JSON、不写日志。
+- 新增 `AiClient`：OpenAI 兼容 Chat Completions，`HttpURLConnection` 10s 连接 / 30s 读取，`temperature=0.2`，要求模型输出 `{"summary","todos"}`；异常只记录异常类名。
+- 新增 `AiSettingsActivity` 与列表菜单「AI settings」：可保存/清除 Key，输入校验 http(s) 地址与必填项。
+- 编辑页菜单「AI summary & to-dos」：未配置时给出「配置 / 离线分析 / 取消」；在线分析显示不可取消进度框；成功、超时、断网、坏 JSON 都落到预览对话框，用户点「插入便签」后才追加 `【AI summary】` 与 `□ 待办`。
+- 单测新增 16 条（`AiResultParserTest` 8、`LocalNoteAnalyzerTest` 8），合计 32 条全绿。
+- 设备验证（Pixel_7 / Android 17，真实 DeepSeek API）：购物清单便签在线返回摘要与 3 条待办，插入后返回列表再打开内容仍在；清除 Key 后弹出未配置对话框，离线分析正常；把端点改为 `http://127.0.0.1:9/...` 模拟断网，日志仅 `AI analyze failed: ConnectException`，界面回退离线结果。
+- Key 泄漏检查：扫描 `note.db`、`logcat` 全量、实际导出备份 JSON，均不含 Key（只输出布尔结果）。
+- 证据：`logs/m6_ai_result.png`、`m6_inserted.png`、`m6_persisted2.png`、`m6_settings.png`、`m6_key_cleared.png`、`m6_setup_dialog.png`、`m6_offline_result.png`、`m6_network_fail.png`、`m6_backup_picker.png`。
 
 ## 二、排期（关键路径）
 
