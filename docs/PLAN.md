@@ -7,7 +7,7 @@
 
 | 编号 | 类型 | 内容 | 验收标准 | 状态 |
 |---|---|---|---|---|
-| M1 | 缺陷 | 老工程现代化与 Android 12–17 兼容；GTask 退役 | assembleDebug 成功；Pixel_7 可安装启动；新建/编辑/保存/搜索/删除/Widget 正常；旧同步入口不误导 | ✅（Widget 回归待做） |
+| M1 | 缺陷 | 老工程现代化与 Android 12–17 兼容；GTask 退役 | assembleDebug 成功；Pixel_7 可安装启动；新建/编辑/保存/搜索/删除/Widget 正常；旧同步入口不误导 | ✅ |
 | M2 | 缺陷 | Provider 数据安全 + SQL 修复 + 测试 | 本应用 CRUD 正常；独立测试 App 无法读写 Provider；恶意 selection 不扩大结果；非法 URI 有确定行为 | ✅ |
 | M3 | 功能 | SAF 导出 UTF-8 TXT + JSON 完整备份/恢复 | 中文/Emoji 导出正确；≥20 条不同类型便签可备份恢复；坏 JSON/取消/空文件不破坏现有数据 | ✅ |
 | M4 | 缺陷 | 提醒与通知重构 | 可设置/修改/取消；通知可见、点击回跳；权限拒绝有说明；重启后恢复提醒 | ✅ |
@@ -21,7 +21,8 @@
 - 发现并修复真实缺陷：原主题把 ActionBar 设为 `gone`，依赖实体 MENU 键；现代设备无菜单键导致设置/搜索/提醒入口不可达，现恢复标准 ActionBar 溢出菜单。
 - GTask：列表菜单与设置页同步入口已移除；`GTaskSyncService` 保留但无调用方，报告中写明「退役」而非「修复」。
 - 联系人查询捕获 `SecurityException`，未授权时退化为显示号码。
-- 验证：构建、安装、启动、新建/编辑/保存、列表、搜索、设置页、提醒设置与触发均通过；Widget 待最终回归。
+- 验证：构建、安装、启动、新建/编辑/保存、列表、搜索、设置页、提醒设置与触发均通过。
+- Widget 最终回归：长按桌面添加 Notes 2x2，未绑定态提示「No associated note found」；点击创建关联便签并输入内容后，微件显示摘要；再次点击进入正确便签；修改正文保存后桌面微件同步更新。证据 `logs/m1_widget_bound.png`、`m1_widget_open_note.png`、`m1_widget_updated.png`。
 - 遗留：`NoteItemData` 主线程查询联系人可改异步（不影响验收）。
 
 ### M2 完成情况

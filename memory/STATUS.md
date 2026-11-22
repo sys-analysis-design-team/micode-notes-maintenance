@@ -20,7 +20,7 @@
 | Pixel_7（Android 17）安装启动 | ✅ | `logs/app_first_launch.png` |
 | 新建/输入/保存/列表显示 | ✅ | `logs/app_editor_typed.png`、`logs/app_list_after_save.png` |
 | 本地 Git：master 原始基线 / develop 维护基线 / 3 个成员分支 | ✅ | `git branch` |
-| M1 兼容清理与 GTask 退役 | ✅ | 提交 `84c4916`；构建/启动/CRUD/搜索/设置/提醒冒烟通过；Widget 待回归 |
+| M1 兼容清理与 GTask 退役 | ✅ | 提交 `84c4916`；构建/启动/CRUD/搜索/设置/提醒通过；Widget 添加/绑定/更新回归通过 |
 | M2 Provider 安全与 SQL 参数化 | ✅ | 提交 `0b77758`；adb 跨应用查询被拒；`ProviderSqlTest` 7/7 |
 | M3 SAF 导出 + JSON 备份恢复 | ✅ | 22 便签/2 文件夹；中文+Emoji 往返正确；恢复 44/4；坏/空 JSON 不改数据 |
 | M5 回收站 | ✅ | 软删除/恢复/彻底删除；文件夹计数 10→9→10；触发器删正文 |
@@ -33,7 +33,7 @@
 
 | 编号 | 内容 | 状态 |
 |---|---|---|
-| M1 | 老工程现代化与 Android 12–17 兼容；GTask 退役 | ✅ 构建/启动/CRUD/搜索/设置/提醒通过；Widget 待最终回归 |
+| M1 | 老工程现代化与 Android 12–17 兼容；GTask 退役 | ✅ 构建/启动/CRUD/搜索/设置/提醒/Widget 全部通过 |
 | M2 | Provider 数据安全 + SQL 修复 + 跨应用拒绝访问测试 | ✅ adb 访问被拒；应用内 CRUD 正常；7 条 SQL 回归测试 |
 | M3 | SAF 导出（UTF-8 TXT）+ JSON 备份/恢复 | ✅ 22 条往返；中文/Emoji 正确；坏/空文件不写入 |
 | M4 | 提醒与通知机制重构 | ✅ 设置/改期/取消；通知可见可点击；权限说明；开机重建 |
@@ -62,6 +62,5 @@
 ## 六、下一步
 
 1. 确认小组仓库地址/归属，推送 master + develop + 成员分支。
-2. 完成 M1 剩余项：Widget 最终回归。
-3. 12/6 前决定 M7；12/10 功能冻结。
-4. 两份报告与 PPT：先完成 U/M 统计、UML、SonarQube/Lint/JUnit 数据。
+2. 12/6 前决定 M7；12/10 功能冻结。
+3. 两份报告与 PPT：先完成 U/M 统计、UML、SonarQube/Lint/JUnit 数据。
