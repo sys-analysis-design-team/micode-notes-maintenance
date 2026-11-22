@@ -80,11 +80,14 @@
                 android:resource="@xml/searchable" />
         </activity>
 
-        <!-- 基线：保持原目标版本下对外可访问的行为，M2 再收紧为 exported=false。 -->
+        <!--
+            M2：便签数据只允许本应用访问。原版 exported=true 且无权限，任何应用都能读写全部便签。
+            应用内搜索、Widget 与 :remote 闹钟进程均属同一 UID，不受影响。
+        -->
         <provider
             android:name="net.micode.notes.data.NotesProvider"
             android:authorities="micode_notes"
-            android:exported="true"
+            android:exported="false"
             android:multiprocess="true" />
 
         <receiver

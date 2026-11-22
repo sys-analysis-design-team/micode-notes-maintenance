@@ -97,18 +97,20 @@ public class NotesProvider extends ContentProvider {
                         sortOrder);
                 break;
             case URI_NOTE_ITEM:
-                id = uri.getPathSegments().get(1);
-                c = db.query(TABLE.NOTE, projection, NoteColumns.ID + "=" + id
-                        + parseSelection(selection), selectionArgs, null, null, sortOrder);
+                id = String.valueOf(ContentUris.parseId(uri));
+                c = db.query(TABLE.NOTE, projection,
+                        ProviderSql.buildItemSelection(NoteColumns.ID, selection),
+                        ProviderSql.mergeArgs(id, selectionArgs), null, null, sortOrder);
                 break;
             case URI_DATA:
                 c = db.query(TABLE.DATA, projection, selection, selectionArgs, null, null,
                         sortOrder);
                 break;
             case URI_DATA_ITEM:
-                id = uri.getPathSegments().get(1);
-                c = db.query(TABLE.DATA, projection, DataColumns.ID + "=" + id
-                        + parseSelection(selection), selectionArgs, null, null, sortOrder);
+                id = String.valueOf(ContentUris.parseId(uri));
+                c = db.query(TABLE.DATA, projection,
+                        ProviderSql.buildItemSelection(DataColumns.ID, selection),
+                        ProviderSql.mergeArgs(id, selectionArgs), null, null, sortOrder);
                 break;
             case URI_SEARCH:
             case URI_SEARCH_SUGGEST:
@@ -178,6 +180,11 @@ public class NotesProvider extends ContentProvider {
                     ContentUris.withAppendedId(Notes.CONTENT_DATA_URI, dataId), null);
         }
 
+        // insert 失败时 SQLiteDatabase 返回 -1，按 ContentProvider 约定返回 null
+        if (insertedId < 0) {
+            Log.e(TAG, "Insert failed for uri " + uri);
+            return null;
+        }
         return ContentUris.withAppendedId(uri, insertedId);
     }
 
@@ -189,30 +196,33 @@ public class NotesProvider extends ContentProvider {
         boolean deleteData = false;
         switch (mMatcher.match(uri)) {
             case URI_NOTE:
-                selection = "(" + selection + ") AND " + NoteColumns.ID + ">0 ";
-                count = db.delete(TABLE.NOTE, selection, selectionArgs);
+                // 原实现直接拼接 selection，selection 为 null 时会生成 "(null) AND ID>0" 导致 SQL 报错
+                count = db.delete(TABLE.NOTE,
+                        ProviderSql.appendSelection(NoteColumns.ID + ">0", selection), selectionArgs);
                 break;
             case URI_NOTE_ITEM:
-                id = uri.getPathSegments().get(1);
+                id = String.valueOf(ContentUris.parseId(uri));
                 /**
                  * ID that smaller than 0 is system folder which is not allowed to
                  * trash
                  */
-                long noteId = Long.valueOf(id);
+                long noteId = Long.parseLong(id);
                 if (noteId <= 0) {
                     break;
                 }
                 count = db.delete(TABLE.NOTE,
-                        NoteColumns.ID + "=" + id + parseSelection(selection), selectionArgs);
+                        ProviderSql.buildItemSelection(NoteColumns.ID, selection),
+                        ProviderSql.mergeArgs(id, selectionArgs));
                 break;
             case URI_DATA:
                 count = db.delete(TABLE.DATA, selection, selectionArgs);
                 deleteData = true;
                 break;
             case URI_DATA_ITEM:
-                id = uri.getPathSegments().get(1);
+                id = String.valueOf(ContentUris.parseId(uri));
                 count = db.delete(TABLE.DATA,
-                        DataColumns.ID + "=" + id + parseSelection(selection), selectionArgs);
+                        ProviderSql.buildItemSelection(DataColumns.ID, selection),
+                        ProviderSql.mergeArgs(id, selectionArgs));
                 deleteData = true;
                 break;
             default:
@@ -239,19 +249,21 @@ public class NotesProvider extends ContentProvider {
                 count = db.update(TABLE.NOTE, values, selection, selectionArgs);
                 break;
             case URI_NOTE_ITEM:
-                id = uri.getPathSegments().get(1);
-                increaseNoteVersion(Long.valueOf(id), selection, selectionArgs);
-                count = db.update(TABLE.NOTE, values, NoteColumns.ID + "=" + id
-                        + parseSelection(selection), selectionArgs);
+                id = String.valueOf(ContentUris.parseId(uri));
+                increaseNoteVersion(Long.parseLong(id), selection, selectionArgs);
+                count = db.update(TABLE.NOTE, values,
+                        ProviderSql.buildItemSelection(NoteColumns.ID, selection),
+                        ProviderSql.mergeArgs(id, selectionArgs));
                 break;
             case URI_DATA:
                 count = db.update(TABLE.DATA, values, selection, selectionArgs);
                 updateData = true;
                 break;
             case URI_DATA_ITEM:
-                id = uri.getPathSegments().get(1);
-                count = db.update(TABLE.DATA, values, DataColumns.ID + "=" + id
-                        + parseSelection(selection), selectionArgs);
+                id = String.valueOf(ContentUris.parseId(uri));
+                count = db.update(TABLE.DATA, values,
+                        ProviderSql.buildItemSelection(DataColumns.ID, selection),
+                        ProviderSql.mergeArgs(id, selectionArgs));
                 updateData = true;
                 break;
             default:
@@ -267,39 +279,36 @@ public class NotesProvider extends ContentProvider {
         return count;
     }
 
-    private String parseSelection(String selection) {
-        return (!TextUtils.isEmpty(selection) ? " AND (" + selection + ')' : "");
-    }
-
+    /**
+     * 版本号自增。
+     *
+     * <p>原实现把 selectionArgs 逐条 {@code replaceFirst} 进 SQL 文本，参数里带引号或
+     * OR 条件时可以改变语句语义。这里改为真正的位置参数绑定。</p>
+     */
     private void increaseNoteVersion(long id, String selection, String[] selectionArgs) {
-        StringBuilder sql = new StringBuilder(120);
-        sql.append("UPDATE ");
-        sql.append(TABLE.NOTE);
-        sql.append(" SET ");
-        sql.append(NoteColumns.VERSION);
-        sql.append("=" + NoteColumns.VERSION + "+1 ");
-
-        if (id > 0 || !TextUtils.isEmpty(selection)) {
-            sql.append(" WHERE ");
-        }
-        if (id > 0) {
-            sql.append(NoteColumns.ID + "=" + String.valueOf(id));
-        }
-        if (!TextUtils.isEmpty(selection)) {
-            String selectString = id > 0 ? parseSelection(selection) : selection;
-            for (String args : selectionArgs) {
-                selectString = selectString.replaceFirst("\\?", args);
-            }
-            sql.append(selectString);
-        }
-
-        mHelper.getWritableDatabase().execSQL(sql.toString());
+        java.util.ArrayList<String> args = new java.util.ArrayList<String>(4);
+        String sql = ProviderSql.buildVersionIncrementSql(TABLE.NOTE, NoteColumns.ID,
+                NoteColumns.VERSION, id, selection, selectionArgs, args);
+        mHelper.getWritableDatabase().execSQL(sql, args.toArray());
     }
 
     @Override
     public String getType(Uri uri) {
-        // TODO Auto-generated method stub
-        return null;
+        switch (mMatcher.match(uri)) {
+            case URI_NOTE:
+                return "vnd.android.cursor.dir/vnd." + Notes.AUTHORITY + ".note";
+            case URI_NOTE_ITEM:
+                return "vnd.android.cursor.item/vnd." + Notes.AUTHORITY + ".note";
+            case URI_DATA:
+                return "vnd.android.cursor.dir/vnd." + Notes.AUTHORITY + ".data";
+            case URI_DATA_ITEM:
+                return "vnd.android.cursor.item/vnd." + Notes.AUTHORITY + ".data";
+            case URI_SEARCH:
+            case URI_SEARCH_SUGGEST:
+                return "vnd.android.cursor.dir/vnd." + Notes.AUTHORITY + ".search";
+            default:
+                throw new IllegalArgumentException("Unknown URI " + uri);
+        }
     }
 
 }

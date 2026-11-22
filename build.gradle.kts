@@ -22,8 +22,11 @@ android {
     sourceSets {
         getByName("main") {
             manifest.srcFile("AndroidManifest.xml")
-            java.srcDirs("src")
-            res.srcDirs("res")
+            java.directories.add("src")
+            res.directories.add("res")
+        }
+        getByName("test") {
+            java.directories.add("test/java")
         }
     }
 
