@@ -20,13 +20,14 @@
 | Pixel_7（Android 17）安装启动 | ✅ | `logs/app_first_launch.png` |
 | 新建/输入/保存/列表显示 | ✅ | `logs/app_editor_typed.png`、`logs/app_list_after_save.png` |
 | 本地 Git：master 原始基线 / develop 维护基线 / 3 个成员分支 | ✅ | `git branch` |
-| 远端小组仓库 | ⏸ 待主人确认归属与地址 | — |
+| M1 兼容清理与 GTask 退役 | ✅ | 提交 `84c4916`；构建/启动/CRUD/搜索/设置/提醒冒烟通过；Widget 待回归 |
+| 远端小组仓库 | ⏸ 待 GitHub 登录与仓库地址 | — |
 
 ## 三、维护项
 
 | 编号 | 内容 | 状态 |
 |---|---|---|
-| M1 | 老工程现代化与 Android 12–17 兼容；GTask 退役 | 🟡 构建与启动已通，Manifest/PendingIntent/广播/同步入口待清理 |
+| M1 | 老工程现代化与 Android 12–17 兼容；GTask 退役 | ✅ 构建/启动/CRUD/搜索/设置/提醒通过；Widget 待最终回归 |
 | M2 | Provider 数据安全 + SQL 修复 + 跨应用拒绝访问测试 | ⬜ |
 | M3 | SAF 导出（UTF-8 TXT）+ JSON 备份/恢复 | ⬜ |
 | M4 | 提醒与通知机制重构 | ⬜ |
