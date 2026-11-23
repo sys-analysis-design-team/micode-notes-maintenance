@@ -2,6 +2,7 @@
 
 > 依据：任务书 + 四份模板 + GPT 两轮评审 + 本地源码扫描（2026-11-23）
 > 截止：2026-12-13 交付；12-14 ~ 12-20 汇报。
+> 小组仓库：https://github.com/sys-analysis-design-team/micode-notes-maintenance
 
 ## 一、维护项（6 必做 + 1 选做）
 

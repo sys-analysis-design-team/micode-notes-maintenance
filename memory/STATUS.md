@@ -27,7 +27,7 @@
 | M4 提醒与通知 | ✅ | 通知弹出/点击回跳/改期/取消；精确权限 window=0；重启 `Rescheduled 1` |
 | M6 AI 摘要 + 待办 | ✅ | 真实 DeepSeek 在线成功；离线/断网回退；插入需确认；Key 不入库/备份/日志 |
 | JVM 单元测试 | ✅ 32/32 | `ProviderSqlTest` 7 + `NoteBackupCodecTest` 9 + `AiResultParserTest` 8 + `LocalNoteAnalyzerTest` 8 |
-| 远端小组仓库 | ⏸ 待 GitHub 登录与仓库地址 | — |
+| 远端小组仓库 | ✅ | `https://github.com/sys-analysis-design-team/micode-notes-maintenance`，五个分支已推送 |
 
 ## 三、维护项
 
@@ -61,6 +61,5 @@
 
 ## 六、下一步
 
-1. 确认小组仓库地址/归属，推送 master + develop + 成员分支。
-2. 12/6 前决定 M7；12/10 功能冻结。
-3. 两份报告与 PPT：先完成 U/M 统计、UML、SonarQube/Lint/JUnit 数据。
+1. 12/6 前决定 M7；12/10 功能冻结。
+2. 两份报告与 PPT：先完成 U/M 统计、UML、SonarQube/Lint/JUnit 数据。
