@@ -17,13 +17,33 @@
 package net.micode.notes.data;
 
 import android.net.Uri;
+/**
+ * 便签应用的数据契约（常量总表）。
+ *
+ * <p>职责：集中定义 ContentProvider 的 authority、内容 URI、笔记/文件夹/系统文件夹的
+ * ID 与类型取值、Intent extra 的键名，以及 note、data 两张表的列名和两种数据子类型
+ * （文本便签 {@link TextNote}、通话便签 {@link CallNote}）的 MIME 类型与列映射。</p>
+ *
+ * <p>架构位置：data 层的公共协议文件。{@link NotesProvider} 按这里的 URI 和列名对外提供
+ * 增删改查，{@link NotesDatabaseHelper} 按列名建表与建触发器；model 层的
+ * {@link net.micode.notes.model.Note}、{@link net.micode.notes.model.WorkingNote}
+ * 和 UI 层都引用这些常量，避免字符串散落各处。</p>
+ *
+ * <p>关键协作类：{@link NotesProvider}、{@link NotesDatabaseHelper}、
+ * {@link net.micode.notes.model.Note}、{@link net.micode.notes.model.WorkingNote}。</p>
+ */
 public class Notes {
+    // ContentProvider 的唯一标识，必须与 AndroidManifest.xml 中 provider 的 android:authorities 一致
     public static final String AUTHORITY = "micode_notes";
     public static final String TAG = "Notes";
+    // note 表中 type 列的取值：普通便签 / 用户文件夹 / 系统内置文件夹
     public static final int TYPE_NOTE     = 0;
     public static final int TYPE_FOLDER   = 1;
     public static final int TYPE_SYSTEM   = 2;
 
+    // 系统文件夹的固定 ID：0 为根文件夹（默认位置），负数表示不对用户展示的内置文件夹。
+    // 它们由 NotesDatabaseHelper.createSystemFolder() 在首次建库时插入，
+    // 其中 ID 小于等于 0 的记录在 NotesProvider.delete() 中禁止删除。
     /**
      * Following IDs are system folders' identifiers
      * {@link Notes#ID_ROOT_FOLDER } is default folder
@@ -35,6 +55,8 @@ public class Notes {
     public static final int ID_CALL_RECORD_FOLDER = -2;
     public static final int ID_TRASH_FOLER = -3;
 
+    // 以下 extra 键用于 Activity / Service / Widget 之间传递“提醒时间、背景色、Widget 信息、
+    // 所属文件夹、通话时间”等参数，统一带 net.micode.notes 前缀避免与系统或其他应用冲突
     public static final String INTENT_EXTRA_ALERT_DATE = "net.micode.notes.alert_date";
     public static final String INTENT_EXTRA_BACKGROUND_ID = "net.micode.notes.background_color_id";
     public static final String INTENT_EXTRA_WIDGET_ID = "net.micode.notes.widget_id";
@@ -42,32 +64,51 @@ public class Notes {
     public static final String INTENT_EXTRA_FOLDER_ID = "net.micode.notes.folder_id";
     public static final String INTENT_EXTRA_CALL_DATE = "net.micode.notes.call_date";
 
+    // 桌面 Widget 的尺寸类型：-1 表示无效/未绑定，0 为 2x 尺寸，1 为 4x 尺寸
     public static final int TYPE_WIDGET_INVALIDE      = -1;
     public static final int TYPE_WIDGET_2X            = 0;
     public static final int TYPE_WIDGET_4X            = 1;
 
+    /**
+     * data 表中 mime_type 列的两种业务取值。
+     *
+     * <p>NOTE 表示“便签正文”数据行（含文本内容与清单模式），
+     * CALL_NOTE 表示“通话记录”数据行（含通话时间与号码）；
+     * 两者的 MIME item 字符串分别复用 {@link TextNote}、{@link CallNote} 的定义。</p>
+     */
     public static class DataConstants {
         public static final String NOTE = TextNote.CONTENT_ITEM_TYPE;
         public static final String CALL_NOTE = CallNote.CONTENT_ITEM_TYPE;
     }
 
+    // note 表的集合 URI：查询全部便签与文件夹；单条记录用 “note/#”（见 NotesProvider 的 URI 匹配）
     /**
      * Uri to query all notes and folders
      */
     public static final Uri CONTENT_NOTE_URI = Uri.parse("content://" + AUTHORITY + "/note");
 
+    // data 表的集合 URI：查询全部数据行；单条记录用 “data/#”
     /**
      * Uri to query data
      */
     public static final Uri CONTENT_DATA_URI = Uri.parse("content://" + AUTHORITY + "/data");
 
+    /**
+     * note 表的列定义。
+     *
+     * <p>note 表用一张表同时保存文件夹和便签：TYPE 列区分记录类型，PARENT_ID 指向同表 ID，
+     * 从而构成“文件夹—子文件夹/便签”的树形结构。便签的正文、清单模式、通话信息不在这张表，
+     * 而是拆到 data 表中，通过 data.note_id 关联。</p>
+     */
     public interface NoteColumns {
+        // 主键。系统文件夹使用固定 ID（0、-1、-2、-3），普通记录由 SQLite 自增分配
         /**
          * The unique ID for a row
          * <P> Type: INTEGER (long) </P>
          */
         public static final String ID = "_id";
 
+        // 父节点 ID：文件夹指向其上级文件夹，便签指向所属文件夹；默认 0 表示根文件夹
         /**
          * The parent's id for note or folder
          * <P> Type: INTEGER (long) </P>
@@ -93,18 +134,22 @@ public class Notes {
          */
         public static final String ALERTED_DATE = "alert_date";
 
+        // 文件夹中存名称；便签中存正文摘要。便签的摘要由 data 表触发器自动同步，
+        // 不需要应用层在保存正文时手工更新（见 NotesDatabaseHelper 的 update_note_content 系列触发器）
         /**
          * Folder's name or text content of note
          * <P> Type: TEXT </P>
          */
         public static final String SNIPPET = "snippet";
 
+        // 绑定到本条便签的桌面 Widget ID，未绑定为 0；Widget 类型见 WIDGET_TYPE
         /**
          * Note's widget id
          * <P> Type: INTEGER (long) </P>
          */
         public static final String WIDGET_ID = "widget_id";
 
+        // Widget 类型：TYPE_WIDGET_2X / TYPE_WIDGET_4X，未绑定为 TYPE_WIDGET_INVALIDE(-1)
         /**
          * Note's widget type
          * <P> Type: INTEGER (long) </P>

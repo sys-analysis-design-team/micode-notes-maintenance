@@ -28,6 +28,12 @@ import net.micode.notes.tool.ReminderScheduler;
  * <p>AlarmManager 中的闹钟不会跨重启保留，必须从数据库重新登记。</p>
  */
 public class AlarmInitReceiver extends BroadcastReceiver {
+    /**
+     * 接收开机、应用升级、系统时间或时区变化广播，重建全部提醒。
+     *
+     * @param context 广播上下文，供提醒调度器查询数据库
+     * @param intent  系统广播意图，本类不读取其内容
+     */
     @Override
     public void onReceive(Context context, Intent intent) {
         ReminderScheduler.rescheduleAll(context);

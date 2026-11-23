@@ -37,6 +37,15 @@ public class AlarmReceiver extends BroadcastReceiver {
     private static final String TAG = "AlarmReceiver";
 
     @Override
+        /**
+         * 处理提醒到点与「知道了」两类广播。
+         *
+         * <p>到点广播：校验便签仍可见后弹出通知；便签已删除或进回收站则静默清理。
+         * ACTION_DISMISS 广播：取消对应通知。</p>
+         *
+         * @param context 广播上下文，用于查询便签与发通知
+         * @param intent  携带便签 ID 的提醒意图
+         */
     public void onReceive(Context context, Intent intent) {
         long noteId = resolveNoteId(intent);
         if (ReminderScheduler.ACTION_DISMISS.equals(intent.getAction())) {
@@ -67,11 +76,20 @@ public class AlarmReceiver extends BroadcastReceiver {
         }
     }
 
+        /**
+         * 解析广播中的便签 ID。
+         *
+         * <p>优先读取 EXTRA_NOTE_ID；兼容旧版以 URI 末段数字表示 ID 的形式。</p>
+         *
+         * @param intent 提醒广播意图
+         * @return 有效便签 ID；两种方式都解析失败时返回 -1
+         */
     private static long resolveNoteId(Intent intent) {
         long noteId = intent.getLongExtra(ReminderScheduler.EXTRA_NOTE_ID, -1);
         if (noteId > 0) {
             return noteId;
         }
+                // 兼容旧格式：便签 ID 可能编码在 intent data 的 URI 路径末段
         Uri data = intent.getData();
         if (data == null) {
             return -1;

@@ -16,8 +16,22 @@
 
 package net.micode.notes.tool;
 
+/**
+ * 谷歌任务（GTask）同步协议的字符串常量表。
+ *
+ * <p>职责：集中定义便签与 GTask 服务器交换 JSON 时使用的字段名、动作类型，
+ * 以及本地用于标记同步元数据的特殊文件夹名与便签名，避免散落的字符串字面量。</p>
+ *
+ * <p>架构位置：tool 包中的纯常量类，被 gtask 子包的同步数据模型引用；
+ * 本身不参与网络请求、数据库读写或 UI 展示。</p>
+ *
+ * <p>关键协作类：{@code net.micode.notes.gtask.data.MetaData}、
+ * {@code net.micode.notes.gtask.data.SqlNote}、
+ * {@code net.micode.notes.gtask.remote.GTaskManager}。</p>
+ */
 public class GTaskStringUtils {
 
+    // 动作（action）协议字段：action_id 标识一次请求，action_type 决定服务端执行何种操作
     public final static String GTASK_JSON_ACTION_ID = "action_id";
 
     public final static String GTASK_JSON_ACTION_LIST = "action_list";
