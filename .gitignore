@@ -28,3 +28,5 @@ logs/
 # PPT work artifacts (rebuild with dist/ppt_src/prepare_assets.py)
 dist/ppt_src/assets/
 dist/ppt_src/renders/
+dist/ppt_src/*.pptx
+dist/ppt_src/*.pdf
