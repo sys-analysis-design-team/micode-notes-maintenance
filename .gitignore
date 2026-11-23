@@ -21,3 +21,10 @@ upstream/
 
 # 本地运行证据与构建日志
 logs/
+
+# Sonar scanner cache
+.scannerwork/
+
+# PPT work artifacts (rebuild with dist/ppt_src/prepare_assets.py)
+dist/ppt_src/assets/
+dist/ppt_src/renders/
