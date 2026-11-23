@@ -195,4 +195,9 @@
         <item quantity="other"><xliff:g id="NUMBER">%1$s</xliff:g> 条符合“<xliff:g id="SEARCH">%2$s</xliff:g>”的搜索结果</item>
     </plurals>
 
+    <string name="file_path">/MIUI/notes/</string>
+    <string name="file_name_txt_format">便签_%s.txt</string>
+    <string name="format_folder_files_count">(%d)</string>
+    <string name="preferences_last_sync_time_format">yyyy-MM-dd HH:mm:ss</string>
+
 </resources>
