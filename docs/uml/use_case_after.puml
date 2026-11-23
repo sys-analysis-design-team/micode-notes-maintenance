@@ -1,0 +1,53 @@
+@startuml
+' 小米便签维护后功能用例图（维护新增用例用绿色标出）
+left to right direction
+skinparam packageStyle rectangle
+skinparam usecase {
+  BackgroundColor #F8F9FA
+  BorderColor #495057
+}
+
+actor "用户" as User
+actor "系统闹钟/通知" as Alarm
+actor "桌面微件" as Widget
+actor "联系人库" as Contacts
+actor "大模型服务" as LLM
+
+rectangle "小米便签（维护后）" {
+  usecase "新建/编辑/删除便签" as UC1
+  usecase "便签列表与排序" as UC2
+  usecase "全文搜索" as UC3
+  usecase "文件夹管理" as UC4
+  usecase "设置字号与背景色" as UC5
+  usecase "设置提醒" as UC6
+  usecase "使用桌面微件" as UC7
+  usecase "通话记录建便签" as UC8
+
+  usecase "导出 UTF-8 文本" as UC9
+  usecase "备份为 JSON" as UC11 #D4EDDA
+  usecase "从 JSON 恢复" as UC12 #D4EDDA
+  usecase "回收站恢复/彻底删除" as UC13 #D4EDDA
+  usecase "AI 摘要与待办提取" as UC14 #D4EDDA
+  usecase "配置 AI 接口" as UC15 #D4EDDA
+}
+
+User --> UC1
+User --> UC2
+User --> UC3
+User --> UC4
+User --> UC5
+User --> UC6
+User --> UC7
+User --> UC8
+User --> UC9
+User --> UC11
+User --> UC12
+User --> UC13
+User --> UC14
+User --> UC15
+
+UC6 --> Alarm : 通知提醒
+UC7 --> Widget : 桌面展示
+UC8 --> Contacts : 号码查姓名
+UC14 --> LLM : 在线分析（可回退离线）
+@enduml

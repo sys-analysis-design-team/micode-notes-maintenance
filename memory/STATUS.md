@@ -28,6 +28,13 @@
 | M6 AI 摘要 + 待办 | ✅ | 真实 DeepSeek 在线成功；离线/断网回退；插入需确认；Key 不入库/备份/日志 |
 | JVM 单元测试 | ✅ 32/32 | `ProviderSqlTest` 7 + `NoteBackupCodecTest` 9 + `AiResultParserTest` 8 + `LocalNoteAnalyzerTest` 8 |
 | 远端小组仓库 | ✅ | `https://github.com/sys-analysis-design-team/micode-notes-maintenance`，五个分支已推送 |
+| 代码标注（38 个原始类） | ✅ 提交 `3917b03` | 3,080 行注释 / 覆盖 5,135 行代码；`docs/analysis/annotation_stats.md`、`annotation_coverage.md` |
+| 维护代码量统计 | ✅ | 6 项维护、2,836 新增 / 1,045 删除 / 3,881 行受影响、25 文件；`docs/analysis/maintenance_stats.md` |
+| 两份报告 | ✅ 初稿完成 | `docs/report/quality_analysis.md`（4 章齐）、`reading_annotation_maintenance.md`（1–5 章齐，第 5 章为草稿） |
+| Android Lint | ✅ 0 Error / 174 Warning | `docs/analysis/lint/`（txt + html + summary）；修复 6 个 Error |
+| SonarQube 扫描（前后对比） | ✅ | `docs/analysis/sonar/`；原始 53 问题/安全 D → 维护后 42 问题/安全 C；注释密度 5.1%→21.1% |
+| UML 图（PlantUML） | ✅ | `docs/uml/`：用例图×2、包图×2、维护后类图，PNG 已渲染 |
+| 成果 PPT 10 页 | ✅ v1 | `dist/小米便签开源软件维护.pptx` + PDF；源在 `dist/ppt_src/`；视觉评审 PASS 0 错误 0 警告 |
 
 ## 三、维护项
 
@@ -50,6 +57,8 @@
 - 工程结构：`src/`、`res/`、`AndroidManifest.xml` 保持在根目录，符合作业要求
 - 构建命令：`sh gradlew assembleDebug`
 - 安装启动：`adb install -r build/outputs/apk/debug/micode-notes-debug.apk`
+- SonarQube：`D:\AI\Tools\sonarqube-26.11.0.134175`，数据目录 `D:\AI\Tools\sq-data-2`，
+  启动 `bin\windows-x86-64\StartSonar.bat`（需 JAVA_HOME=JDK 21），端口 9000；扫描器在 `D:\AI\Tools\sonar-scanner-8.5.0.16571-windows-x64`
 
 ## 五、关键决策
 
@@ -61,5 +70,8 @@
 
 ## 六、下一步
 
-1. 12/6 前决定 M7；12/10 功能冻结。
-2. 两份报告与 PPT：先完成 U/M 统计、UML、SonarQube/Lint/JUnit 数据。
+1. 报告收尾：两份报告通读定稿（数字与工具报告一致；第 5 章按实际使用补充）。
+2. PPT 补演示录屏（25 秒连续操作），替换第 9 页占位说明。
+3. 组员分工与贡献页：按实际提交更新第 10 页（当前注明计划分工）。
+4. 12/6 前决定 M7；12/10 功能冻结。
+5. 本轮 Lint 修复与文档/PPT 未提交（待提交后推送）。

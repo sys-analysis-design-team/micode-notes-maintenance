@@ -94,7 +94,7 @@ Google Tasks 云同步。工程不含构建脚本、不含任何测试代码、�
 
 ### 3.3 编程技能
 
-- **SQLite 触发器**：用 9 个触发器在数据库层维护便签摘要与文件夹计数，
+- **SQLite 触发器**：用 10 个触发器在数据库层维护便签摘要与文件夹计数，
   保证批量操作后计数仍一致，体现了把不变量下沉到存储层的设计技巧。
 - **编辑态聚合**：`WorkingNote` 把「原值/新值/差量」封装在一个对象里，
   只在保存时计算 INSERT/UPDATE/DELETE，减少无效写库。
@@ -126,6 +126,108 @@ Google Tasks 云同步。工程不含构建脚本、不含任何测试代码、�
 | P2 | 固定浅色主题，无深色模式资源 | `res/values` |
 | P2 | 吞异常、`AsyncTask`、`getDefaultDisplay()` 等过时 API | 多处 |
 
+逐类标注过程中另外确认的缺陷线索（只记录，未修改代码）：
+
+- `TaskList.addChildTask`：插入后取 `get(size-1)` 作为前驱兄弟，实际拿到新任务自身，
+  字段指向自己；本地新建任务 gid 为 null 时不写入 JSON，故暂未触发。
+- `WorkingNote.saveNote`：忽略 `Note.syncNote` 的返回值；
+  首次保存只发生 insert 时 `pushIntoContentResolver` 返回 null，语义上被判失败。
+- `NotesDatabaseHelper`：v1 直升 v4 的升级路径 `skipV2` 跳过 V3 分支，
+  最终版本号停在 2，会抛 `IllegalStateException`。
+- `ResourceParser.getTexAppearanceResource`：兜底分支返回索引常量（1）而非 style 资源 ID，
+  与正常路径语义不一致。
+- `DateTimePicker`：24 小时制下小时折算依赖 `mIsAm`，而 `mIsAm` 不随小时滚动更新，
+  15 点可能被算成 3 点；`DateTimePickerDialog.updateTitle` 三元表达式两个分支相同。
+- `GTaskClient.loginGoogleAccount`：`invalidateToken` 分支递归调用后丢弃返回值；
+  `GTaskSyncService.onStartCommand` 对系统重建时的 null Intent 无保护。
+- `NotesListAdapter.selectAll`：逐行调用 `notifyDataSetChanged`，重复整表刷新。
+
 ## 4 工具分析代码的质量情况
 
-> 待补：Android Lint 与 SonarQube 的原始报告、问题分布与前后对比。
+### 4.1 SonarQube 扫描设置
+
+原始代码与维护后代码分别扫描为两个项目，用同一套 SonarQube 实例与规则，
+保证可比性：
+
+| 项目 | 扫描对象 | 提交 |
+|---|---|---|
+| `micode-notes-base` | 原始代码（39 文件） | `1098a1e` |
+| `micode-notes` | 维护后代码（51 文件） | `3917b03` |
+
+工具：SonarQube Community Build 26.11.0 + SonarScanner CLI 8.5.0，
+规则集为内置 Sonar way（Java），JDK 21，原始输出存于
+`docs/analysis/sonar/`（`measures_base.json`、`measures_after.json`、`summary.md`）。
+
+### 4.2 原始代码的扫描结果
+
+39 个文件、65 个类、471 个方法、7,395 行代码；注释行 401、注释密度 5.1%；
+圈复杂度 1,325、认知复杂度 1,403；重复行密度 2.9%。
+共 53 个未解决问题：漏洞 51、Bug 2、代码坏味道 0；
+可靠性评级 C、**安全性评级 D**、可维护性评级 A。
+
+| 规则 | 数量 | 含义 |
+|---|---|---|
+| `java:S4507` | 42 | 生产代码保留调试输出（`Log.d` 等） |
+| `java:S5320` | 7 | 广播 Intent 未限定接收方 |
+| `java:S3923` | 2 | 条件分支返回值相同 |
+| `java:S5322` | 1 | 动态广播接收器未声明权限（CRITICAL，`NotesPreferenceActivity:84`） |
+| `java:S5324` | 1 | 敏感数据写入外部存储（CRITICAL，`BackupUtils:317`） |
+
+两个 CRITICAL 问题与第 3 章人工分析的两条 P0/P1 结论完全一致：
+未加保护的动态广播、导出直接写外部存储。工具与人工阅读互相印证。
+
+### 4.3 维护后代码的扫描结果与前后对比
+
+| 指标 | 原始代码 | 维护后 | 变化 |
+|---|---|---|---|
+| 文件 / 类 / 方法 | 39 / 65 / 471 | 51 / 80 / 557 | +12 / +15 / +86 |
+| 代码行（ncloc） | 7,395 | 8,696 | +1,301 |
+| 注释行 / 密度 | 401 / 5.1% | 2,332 / 21.1% | **+1,931 / +16.0pp** |
+| 圈复杂度 / 认知复杂度 | 1,325 / 1,403 | 1,645 / 1,622 | +320 / +219 |
+| 重复行密度 | 2.9% | 2.3% | -0.6pp |
+| 问题总数 | 53 | 42 | **-11** |
+| 漏洞 | 51 | 40 | **-11** |
+| Bug | 2 | 2 | 0 |
+| 可靠性评级 | C | C | 持平 |
+| 安全性评级 | **D** | **C** | **+1 级** |
+| 可维护性评级 | A | A | 持平 |
+
+变化的主要原因：
+
+- **注释密度翻四倍**来自代码标注（新增 3,080 行注释中的大部分落在 ncloc 统计范围外，
+  注释行从 401 增至 2,332）。
+- **漏洞减少 11 个、安全性从 D 升到 C**：两个 CRITICAL（S5322 广播接收器、
+  S5324 外部存储）随 M1/M3 修复消失；S4507 调试输出由 42 降到 33（M1 清理了
+  同步链路的部分日志）。
+- **复杂度上升**属预期：新增 13 个类与 AI/备份链路带来新逻辑；
+  但重复率反而从 2.9% 降到 2.3%，说明新增代码没有复制粘贴式膨胀。
+
+维护后扫描剩余 42 个问题的分布仍然集中在退役代码：
+`gtask/remote` 21、`gtask/data` 15、`ui` 6；其中 gtask 两个子包占 85.7%。
+这些是保留但不接入 UI 的 Google Tasks 同步源码（后端已下线），
+修复它们没有运行价值，报告如实保留而不做「为指标而改」。
+
+### 4.4 Android Lint 检查
+
+原始工程没有构建脚本，Lint 在原始形态下无法运行；完成 M1 迁移后第一次可跑。
+在 `lintDebug`（debug 变体）下首轮得到 180 个问题（6 Error、174 Warning），
+逐条处理 6 个 Error 后为 174 个 Warning、**0 Error**：
+
+| Error 规则 | 位置 | 处理 |
+|---|---|---|
+| `WrongConstant` | `NoteEditActivity:446` | 上游遗留的 `-View.VISIBLE`（一元负号）改为 `View.VISIBLE` |
+| `Orientation` | `res/layout/note_edit.xml:86` | 单子元素 LinearLayout 补 `android:orientation="vertical"` |
+| `MissingTranslation` ×4 | `strings.xml` | 原始代码缺 4 条中文翻译，补入 `values-zh-rCN` |
+
+剩余 174 个 Warning 主要集中在资源与国际化层面：
+`UnusedResources` 34、`RtlHardcoded` 32、`ContentDescription` 26、
+`TypographyEllipsis` 15、`StaticFieldLeak` 12。这些属于老工程的资源遗留，
+不影响功能正确性，记录在 `docs/analysis/lint/`（原始 txt 与 HTML 报告）。
+
+### 4.5 单元测试与动态验证
+
+- JVM 单元测试 32 条：`ProviderSqlTest` 7、`NoteBackupCodecTest` 9、
+  `AiResultParserTest` 8、`LocalNoteAnalyzerTest` 8，全部通过。
+- 动态验证：Pixel_7（Android 17 / API 37）模拟器逐功能回归，
+  覆盖列表、编辑、提醒、通知、回收站、备份恢复、AI 分析七个场景，
+  截图见 `logs/`（清单见维护报告 3.4 节）。

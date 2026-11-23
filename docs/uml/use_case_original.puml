@@ -1,0 +1,43 @@
+@startuml
+' 小米便签原始功能用例图
+left to right direction
+skinparam packageStyle rectangle
+skinparam usecase {
+  BackgroundColor #F8F9FA
+  BorderColor #495057
+}
+actor "用户" as User
+actor "系统闹钟" as Alarm
+actor "桌面微件" as Widget
+actor "联系人库" as Contacts
+actor "云端任务服务" as Cloud
+
+rectangle "小米便签" {
+  usecase "新建/编辑/删除便签" as UC1
+  usecase "便签列表与排序" as UC2
+  usecase "全文搜索" as UC3
+  usecase "文件夹管理" as UC4
+  usecase "设置字号与背景色" as UC5
+  usecase "设置提醒" as UC6
+  usecase "使用桌面微件" as UC7
+  usecase "通话记录建便签" as UC8
+  usecase "导出文本" as UC9
+  usecase "云同步" as UC10
+}
+
+User --> UC1
+User --> UC2
+User --> UC3
+User --> UC4
+User --> UC5
+User --> UC6
+User --> UC7
+User --> UC8
+User --> UC9
+User --> UC10
+
+UC6 --> Alarm : 到点触发
+UC7 --> Widget : 桌面展示
+UC8 --> Contacts : 号码查姓名
+UC10 --> Cloud : 双向同步
+@enduml

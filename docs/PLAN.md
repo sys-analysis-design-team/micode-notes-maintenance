@@ -141,3 +141,16 @@
 - 块级：DB、Provider、WorkingNote 为主，30–50 个逻辑块；解释为什么。
 - 语句级：8 个样板类，精读并注释 300–500 行；只标隐含约束/边界。
 - 统计三列分开：注释物理行数、被解释代码行数、精读代码行数；提交前用脚本重新统计，不手抄。
+
+### 标注完成情况（2026-11-23，提交 `3917b03`）
+
+- 38 个现存原始类全部标注（`AlarmAlertActivity` 已被 M4 重构删除，不计）。
+- 新增注释 3,080 行，覆盖代码 5,135 行；规范见 `docs/analysis/annotation_guide.md`。
+- 统计脚本：`tools/count_annotations.py`（注释行）、`tools/count_annotation_coverage.py`（覆盖行）、
+  `tools/verify_annotation.py`（只加注释校验）。
+- 校验：0 删除行、`assembleDebug` 成功、单测 32/32。
+- 标注中发现的上游疑似缺陷（只记录不改代码）：
+  `TaskList.addChildTask` 前驱指向自身；`WorkingNote.saveNote` 忽略返回值；
+  `ResourceParser` 兜底分支返回索引常量；`DateTimePicker` 24 小时制折算依赖 mIsAm；
+  `DateTimePickerDialog` 标题恒为 24 小时制；`GTaskClient.invalidateToken` 递归返回值未使用；
+  `GTaskSyncService.onStartCommand` 对 null Intent 无保护；`WorkingNote` v1 直升 v4 升级路径不可用。

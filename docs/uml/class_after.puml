@@ -1,0 +1,112 @@
+@startuml
+' 小米便签维护后设计类图（绿色为新增类，橙色为重构类）
+skinparam classAttributeIconSize 0
+skinparam class {
+  BackgroundColor #F8F9FA
+  BorderColor #495057
+}
+
+package "ui" {
+  class NotesListActivity #FFE8CC {
+    +备份/恢复/回收站/导出菜单
+  }
+  class NoteEditActivity #FFE8CC {
+    +提醒设置
+    +AI 摘要入口
+  }
+  class TrashActivity #D4EDDA {
+    +恢复
+    +彻底删除
+    +清空
+  }
+  class AiSettingsActivity #D4EDDA {
+    +配置 endpoint/model/key
+  }
+  class AlarmReceiver #FFE8CC {
+    +onReceive
+  }
+}
+
+package "tool" {
+  class BackupUtils #FFE8CC {
+    +writeText()
+    +buildBackup()
+    +restoreJson()
+  }
+  class NoteBackupCodec #D4EDDA {
+    +encode(): String
+    +decode(): List<BackupNote>
+  }
+  class BackupNote #D4EDDA {
+    +originalId
+    +title
+    +content
+  }
+  class ReminderScheduler #D4EDDA {
+    +schedule()
+    +cancel()
+    +rescheduleAll()
+    +canScheduleExactAlarms()
+  }
+  class ReminderNotifier #D4EDDA {
+    +notify()
+    +cancel()
+    +canPostNotifications()
+  }
+  class AiClient #D4EDDA {
+    +analyze(settings, content)
+  }
+  class LocalNoteAnalyzer #D4EDDA {
+    +analyze(content)
+  }
+  class AiResultParser #D4EDDA {
+    +parse(raw)
+  }
+  class AiSettings #D4EDDA {
+    +load()/save()
+    +clearApiKey()
+  }
+  class AiAnalysis #D4EDDA {
+    +summary
+    +todos
+    +fromAi
+  }
+}
+
+package "data" {
+  class NotesProvider #FFE8CC
+  class ProviderSql #D4EDDA {
+    +构造参数化 SQL
+  }
+  class NotesDatabaseHelper
+}
+
+NotesListActivity --> TrashActivity
+NotesListActivity --> AiSettingsActivity
+NotesListActivity ..> BackupUtils
+NotesListActivity ..> NoteBackupCodec
+NotesListActivity ..> ReminderScheduler
+NotesListActivity ..> ReminderNotifier
+
+NoteEditActivity ..> AiClient
+NoteEditActivity ..> AiSettings
+NoteEditActivity ..> LocalNoteAnalyzer
+NoteEditActivity ..> ReminderScheduler
+NoteEditActivity ..> ReminderNotifier
+
+AlarmReceiver ..> ReminderNotifier
+AlarmReceiver ..> NotesProvider
+
+AiClient ..> AiSettings
+AiClient ..> AiResultParser
+AiClient ..> AiAnalysis
+LocalNoteAnalyzer ..> AiAnalysis
+AiResultParser ..> AiAnalysis
+
+BackupUtils ..> NoteBackupCodec
+NoteBackupCodec ..> BackupNote
+BackupUtils ..> NotesProvider
+
+NotesProvider ..> ProviderSql
+NotesProvider --> NotesDatabaseHelper
+@enduml

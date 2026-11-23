@@ -1,0 +1,63 @@
+@startuml
+' 小米便签维护后包图（绿色为新增类，橙色为重构类）
+skinparam packageStyle rectangle
+skinparam componentStyle rectangle
+
+package "net.micode.notes" {
+  package "ui" as UI {
+    [NotesListActivity] #FFE8CC
+    [NoteEditActivity] #FFE8CC
+    [NotesPreferenceActivity]
+    [TrashActivity] #D4EDDA
+    [AiSettingsActivity] #D4EDDA
+    [AlarmReceiver 等]
+  }
+  package "model" as MODEL {
+    [WorkingNote]
+    [Note]
+  }
+  package "data" as DATA {
+    [NotesProvider] #FFE8CC
+    [ProviderSql] #D4EDDA
+    [NotesDatabaseHelper]
+    [Notes (契约)]
+    [Contact]
+  }
+  package "tool" as TOOL {
+    [DataUtils]
+    [BackupUtils] #FFE8CC
+    [BackupNote] #D4EDDA
+    [NoteBackupCodec] #D4EDDA
+    [ReminderScheduler] #D4EDDA
+    [ReminderNotifier] #D4EDDA
+    [AiAnalysis] #D4EDDA
+    [AiClient] #D4EDDA
+    [AiResultParser] #D4EDDA
+    [AiSettings] #D4EDDA
+    [LocalNoteAnalyzer] #D4EDDA
+    [ResourceParser]
+  }
+  package "gtask（退役，保留源码）" as GTASK {
+    [GTaskManager / GTaskClient 等]
+  }
+  package "widget" as WIDGET {
+    [NoteWidgetProvider] #FFE8CC
+  }
+}
+
+database "SQLite\n(新增 deleted / ai_summary\n/ ai_todos 字段)" as DB
+cloud "大模型服务\n(OpenAI 兼容)" as LLM
+actor "用户" as User
+
+User --> UI
+UI --> MODEL
+UI --> TOOL : 备份/恢复/AI
+UI --> DATA
+MODEL --> DATA
+DATA --> DB
+TOOL --> DB : 备份读取
+TOOL --> LLM : HTTPS(可选，可离线回退)
+ReminderScheduler --> AlarmManager : 精确闹钟
+ReminderNotifier --> NotificationManager : 渠道通知
+WIDGET --> DATA
+@enduml

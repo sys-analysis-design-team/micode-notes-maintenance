@@ -1,0 +1,66 @@
+@startuml
+' 小米便签原始包图
+skinparam packageStyle rectangle
+skinparam componentStyle rectangle
+
+package "net.micode.notes" {
+  package "ui" as UI {
+    [NotesListActivity]
+    [NoteEditActivity]
+    [NotesPreferenceActivity]
+    [AlarmInitReceiver / AlarmReceiver]
+    [适配器与自定义控件]
+  }
+  package "model" as MODEL {
+    [WorkingNote]
+    [Note]
+  }
+  package "data" as DATA {
+    [NotesProvider]
+    [NotesDatabaseHelper]
+    [Notes (契约)]
+    [Contact]
+  }
+  package "tool" as TOOL {
+    [DataUtils]
+    [BackupUtils]
+    [ResourceParser]
+    [GTaskStringUtils]
+  }
+  package "gtask" as GTASK {
+    package "remote" as REMOTE {
+      [GTaskManager]
+      [GTaskClient]
+      [GTaskSyncService]
+      [GTaskASyncTask]
+    }
+    package "data" as GDATA {
+      [Node / Task / TaskList]
+      [MetaData]
+      [SqlData / SqlNote]
+    }
+    package "exception" as GEXC {
+      [ActionFailureException 等]
+    }
+  }
+  package "widget" as WIDGET {
+    [NoteWidgetProvider]
+  }
+}
+
+database "SQLite\n(note / data)" as DB
+cloud "Google Tasks API\n(已下线)" as CLOUD
+
+UI --> MODEL : 编辑期聚合
+UI --> TOOL : 批量操作/导出
+UI --> DATA : ContentResolver
+UI --> WIDGET : 刷新
+MODEL --> DATA : 差量提交
+DATA --> DB : SQL
+TOOL --> DATA : 批量 SQL
+REMOTE --> GDATA
+REMOTE --> CLOUD : HTTPS
+UI --> REMOTE : 设置页触发同步
+GDATA --> DATA : 读写同一库
+WIDGET --> DATA
+@enduml
