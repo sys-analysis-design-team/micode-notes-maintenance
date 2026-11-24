@@ -156,7 +156,7 @@
             android:exported="false"
             android:label="@string/preferences_title"
             android:launchMode="singleTop"
-            android:theme="@android:style/Theme.Holo.Light" >
+            android:theme="@style/NoteTheme" >
         </activity>
 
         <service

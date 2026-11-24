@@ -187,6 +187,7 @@
     <string name="preferences_toast_cannot_change_account">Cannot change the account because sync is in progress</string>
     <string name="preferences_toast_success_set_accout">%1$s has been set as the sync account</string>
     <string name="preferences_bg_random_appear_title">New note background color random</string>
+    <string name="preferences_theme_title">Theme</string>
 
     <string name="button_delete">Delete</string>
     <string name="call_record_folder_name">Call notes</string>

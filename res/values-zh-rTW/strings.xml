@@ -181,6 +181,7 @@
     <string name="preferences_toast_cannot_change_account">正在同步中，不能修改同步帳號</string>
     <string name="preferences_toast_success_set_accout">同步帳號已設置為%1$s</string>
     <string name="preferences_bg_random_appear_title">新建便籤背景顏色隨機</string>
+    <string name="preferences_theme_title">主題</string>
 
     <string name="button_delete">刪除</string>
     <string name="call_record_folder_name">通話便籤</string>

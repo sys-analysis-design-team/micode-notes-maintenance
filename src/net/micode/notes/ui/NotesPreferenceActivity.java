@@ -20,6 +20,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.preference.Preference;
 import android.preference.PreferenceActivity;
 import android.view.MenuItem;
 
@@ -44,6 +45,7 @@ public class NotesPreferenceActivity extends PreferenceActivity {
 
     @Override
     protected void onCreate(Bundle icicle) {
+        ThemeHelper.apply(this);
         super.onCreate(icicle);
 
         if (getActionBar() != null) {
@@ -52,6 +54,27 @@ public class NotesPreferenceActivity extends PreferenceActivity {
 
         addPreferencesFromResource(R.xml.preferences);
         clearLegacySyncAccount(this);
+        bindThemePreference();
+    }
+
+    /**
+     * M7 深色模式：主题切换后重建设置页，让选择立即生效。
+     */
+    private void bindThemePreference() {
+        Preference themePreference = findPreference(ThemeHelper.KEY_THEME_MODE);
+        if (themePreference == null) {
+            return;
+        }
+        themePreference.setOnPreferenceChangeListener(
+                new Preference.OnPreferenceChangeListener() {
+                    @Override
+                    public boolean onPreferenceChange(Preference preference, Object newValue) {
+                        // ListPreference 在回调返回后才持久化，这里先写入，保证重建时读到新值
+                        ThemeHelper.setMode(NotesPreferenceActivity.this, (String) newValue);
+                        recreate();
+                        return true;
+                    }
+                });
     }
 
     /**

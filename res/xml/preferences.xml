@@ -19,6 +19,13 @@
     xmlns:android="http://schemas.android.com/apk/res/android">
     <!-- GTask 同步已退役，不再提供账号与同步设置 -->
     <PreferenceCategory>
+        <!-- M7 深色模式：三态（跟随系统 / 浅色 / 深色），切换后立即重建界面 -->
+        <ListPreference
+            android:key="pref_key_theme_mode"
+            android:title="@string/preferences_theme_title"
+            android:entries="@array/theme_mode_entries"
+            android:entryValues="@array/theme_mode_values"
+            android:defaultValue="follow" />
         <CheckBoxPreference
             android:key="pref_key_bg_random_appear"
             android:title="@string/preferences_bg_random_appear_title"

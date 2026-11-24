@@ -39,6 +39,7 @@ public class AiSettingsActivity extends Activity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        ThemeHelper.apply(this);
         super.onCreate(savedInstanceState);
         setContentView(R.layout.ai_settings);
         setTitle(R.string.ai_settings_title);

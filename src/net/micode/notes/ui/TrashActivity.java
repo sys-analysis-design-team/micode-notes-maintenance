@@ -76,6 +76,7 @@ public class TrashActivity extends Activity implements AdapterView.OnItemClickLi
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        ThemeHelper.apply(this);
         super.onCreate(savedInstanceState);
         setContentView(R.layout.trash_list);
         mResolver = getContentResolver();

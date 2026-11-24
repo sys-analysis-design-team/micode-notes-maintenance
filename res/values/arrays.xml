@@ -16,6 +16,18 @@
 -->
 
 <resources>
+    <!-- M7 深色模式：设置页主题三态 -->
+    <string-array name="theme_mode_entries">
+        <item>Follow system</item>
+        <item>Light</item>
+        <item>Dark</item>
+    </string-array>
+    <string-array name="theme_mode_values">
+        <item>follow</item>
+        <item>light</item>
+        <item>dark</item>
+    </string-array>
+
     <!-- Backup format -->
     <string-array name="format_for_exported_note">
         <item>-%s</item>      <!-- format_folder_name -->

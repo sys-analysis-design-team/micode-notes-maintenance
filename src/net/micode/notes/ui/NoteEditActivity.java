@@ -164,6 +164,7 @@ public class NoteEditActivity extends Activity implements OnClickListener,
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        ThemeHelper.apply(this);
         super.onCreate(savedInstanceState);
         this.setContentView(R.layout.note_edit);
 

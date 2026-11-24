@@ -150,6 +150,7 @@ public class NotesListActivity extends Activity implements OnClickListener, OnIt
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        ThemeHelper.apply(this);
         super.onCreate(savedInstanceState);
         setContentView(R.layout.note_list);
         initResources();
@@ -158,6 +159,13 @@ public class NotesListActivity extends Activity implements OnClickListener, OnIt
          * Insert an introduction when user firstly use this application
          */
         setAppInfoFromRawRes();
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        // 从设置页返回时主题可能已经变化，重建自身让新主题立即生效
+        ThemeHelper.recreateIfThemeChanged(this);
     }
 
     @Override

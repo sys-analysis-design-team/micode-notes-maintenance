@@ -65,4 +65,11 @@
     -->
     <style name="NoteTheme" parent="@android:style/Theme.Holo.Light">
     </style>
+
+    <!--
+        维护说明（M7 深色模式）：深色主题，用于设置页选择「深色」，或「跟随系统」
+        且系统处于夜间模式时。Holo 自带深色 ActionBar、对话框与输入框配色。
+    -->
+    <style name="NoteTheme.Dark" parent="@android:style/Theme.Holo">
+    </style>
 </resources>

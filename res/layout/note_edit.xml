@@ -98,6 +98,7 @@
                         android:linksClickable="false"
                         android:minLines="12"
                         android:textAppearance="@style/TextAppearancePrimaryItem"
+                        android:textColor="@color/primary_text_dark"
                         android:lineSpacingMultiplier="1.2" />
 
                     <LinearLayout
