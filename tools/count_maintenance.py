@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""按维护项统计 M1–M6 的代码变更量（仅统计 src/ 下的 Java 文件）。
+"""按维护项统计 M1–M9 的代码变更量（仅统计 src/ 下的 Java 文件）。
 
 用法：
     python tools/count_maintenance.py [--out docs/analysis/maintenance_stats.md]
@@ -23,6 +23,9 @@ ITEMS = [
     ("M5", "回收站", ["5586889"]),
     ("M4", "提醒与通知重构", ["f6c79ea"]),
     ("M6", "AI 摘要 + 待办提取", ["dddfddc"]),
+    ("M7", "深色模式（跟随系统/浅色/深色三态）", ["b789c50"]),
+    ("M8", "便签置顶/取消置顶", ["1c3df0e"]),
+    ("M9", "提醒重复（每天/每周/工作日）", ["7487201"]),
 ]
 
 
@@ -91,7 +94,7 @@ def main() -> int:
             f"| {added} | {deleted} | {added + deleted} | {len(files)} |"
         )
     lines.append(
-        f"| 合计 | 6 项维护 | — | {total_added} | {total_deleted} "
+        f"| 合计 | {len(ITEMS)} 项维护 | — | {total_added} | {total_deleted} "
         f"| {total_added + total_deleted} | {len(total_files)} |"
     )
     lines += [

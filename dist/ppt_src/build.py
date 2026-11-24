@@ -36,7 +36,7 @@ def cover(d: Deck) -> None:
            color=WHITE, line_spacing=1.06)
     d.rect(s, MARGIN, 3.62, 1.0, 0.055, fill=TEAL, shape=MSO_SHAPE.RECTANGLE)
     d.text(s, MARGIN, 3.86, 10.5, 0.62,
-           "泛读 · 标注 · 维护：39 个文件 / 10,001 行，6 项维护 + 1 项拓展",
+           "泛读 · 标注 · 维护：39 个文件 / 10,001 行，9 项维护 + 团队新功能",
            size=15, color="9FC7D2")
     d.text(s, MARGIN, 6.32, 6.0, 0.26, "袁晨昕 · 刘嘉 · 罗奕峰", size=11, color="7FA0B4")
     d.text(s, MARGIN, 6.62, 6.0, 0.26, "2026-12", size=11, color="5F8796")
@@ -146,21 +146,25 @@ def provider_page(d: Deck) -> None:
 
 def reminder_trash_page(d: Deck) -> None:
     s = d.slide()
-    d.header(s, "04 拓展", "可靠提醒与可恢复删除", "两个用户每天都会碰到的功能")
+    d.header(s, "04 拓展", "提醒、通知与可恢复删除", "M4 提醒重构 · M9 重复提醒 · M5 回收站")
     d.picture_card(s, str(ASSETS / "shot_notification.png"), MARGIN, 1.6, w=2.1)
     d.text(s, MARGIN, 5.86, 2.5, 0.5, "M4 通知：渠道 + 动作 + 点击回到便签",
            size=10, color=MUTED, line_spacing=1.2)
-    d.bullets(s, 3.55, 1.7, 4.5, 4.6, [
+    d.bullets(s, 3.55, 1.7, 4.6, 4.7, [
         ("M4 提醒重构：", "精确闹钟权限适配；通知渠道与动作按钮；开机重排全部提醒。"),
+        ("M9 重复提醒：", "每天 / 每周 / 工作日三档，到点自动推进下一次；"
+                    "改系统时间的补偿路径做了幂等，不会一次跳两天。"),
         ("M5 回收站：", "删除改为软删除；支持恢复、彻底删除、清空回收站。"),
         ("文件夹保护：", "删除文件夹时按层级进入回收站，恢复后回到原位置。"),
-    ], size=12, gap=12)
+    ], size=11.5, gap=10)
     d.picture_card(s, str(ASSETS / "shot_trash.png"), 8.55, 1.6, w=2.1)
     d.text(s, 8.55, 5.86, 2.5, 0.5, "M5 回收站：恢复 / 彻底删除 / 清空",
            size=10, color=MUTED, line_spacing=1.2)
     d.footer(s)
     d.notes(s, "提醒这块的坑在 Android 12+ 的精确闹钟和 13+ 的通知权限，"
-               "都做了降级路径；回收站是软删除，不改变原有列表查询逻辑。")
+               "都做了降级路径；M9 在真机拨时钟测试时抓到一个双推进竞态——"
+               "系统改时间的补偿和过期闹钟各推进一步，一次跳掉一整天，"
+               "靠幂等判断修掉。回收站是软删除，不改变原有列表查询逻辑。")
 
 
 def ai_page(d: Deck) -> None:
@@ -180,73 +184,96 @@ def ai_page(d: Deck) -> None:
                "大模型接口是可选项，不配置也能用。")
 
 
+def experience_page(d: Deck) -> None:
+    s = d.slide()
+    d.header(s, "04 拓展", "体验增强与团队新功能", "深色模式 / 便签置顶 / 成员分支开发中")
+    d.picture_card(s, str(ASSETS / "shot_dark.png"), MARGIN, 1.68, w=2.0)
+    d.text(s, MARGIN, 5.92, 2.0, 0.3, "M7 深色模式：三态切换",
+           size=9, color=MUTED, line_spacing=1.2)
+    d.picture_card(s, str(ASSETS / "shot_pinned.png"), 2.76, 1.68, w=2.0)
+    d.text(s, 2.76, 5.92, 2.0, 0.3, "M8 置顶：图钉标记，排序靠前",
+           size=9, color=MUTED, line_spacing=1.2)
+    d.bullets(s, 5.02, 1.78, 2.9, 4.4, [
+        ("M7 深色模式：", "跟随系统 / 浅色 / 深色三态；只改窗口与控件，便签纸保持浅色。"),
+        ("M8 便签置顶：", "多选批量置顶；置顶状态只存本机，不进备份 JSON。"),
+    ], size=11, gap=14)
+    d.rect(s, 8.1, 1.6, 4.62, 4.9, fill=SOFT, line=LINE, radius=0.06)
+    d.text(s, 8.4, 1.78, 4.0, 0.3, "团队新功能（成员分支开发中）",
+           size=11.5, bold=True, color=TEAL_DARK)
+    d.text(s, 8.4, 2.12, 4.0, 0.3, "两位成员各提 1–2 个，与 M1–M9 不重复",
+           size=9.5, color=MUTED)
+    y = 2.6
+    for name in ("刘嘉", "罗奕峰"):
+        d.rect(s, 8.4, y, 4.02, 1.8, fill=CARD, line=LINE, radius=0.08)
+        d.text(s, 8.62, y + 0.14, 1.5, 0.3, name, size=11, bold=True, color=NAVY)
+        d.chip(s, 11.15, y + 0.16, 1.05, 0.3, "待提交", size=9)
+        d.text(s, 8.62, y + 0.62, 3.6, 0.95, "功能名 + 一句话说明（做什么 + 怎么做）",
+               size=9.5, color=MUTED, line_spacing=1.3)
+        y += 1.95
+    d.footer(s)
+    d.notes(s, "M7/M8 是组长这一轮加的体验项：深色模式按三态切换，但便签纸刻意保持浅色，"
+               "因为纸张质感是这个产品的特征；置顶是本地 UI 状态，不进备份。"
+               "右侧两位成员的新功能正在各自分支上开发，提交后把卡片换成实际功能名与一句话。"
+               "【待更新】成员功能确定后，更新本页两个占位卡与第 10 页分工。")
+
+
 def class_diagram_page(d: Deck) -> None:
     s = d.slide()
     d.header(s, "05 设计", "维护后架构与类设计", "新增类绿色、重构类橙色，分层不变")
     d.picture(s, str(ASSETS / "class_after.png"), MARGIN, 1.72, w=11.9)
     d.text(s, MARGIN, 6.28, 11.9, 0.55,
-           "新增 13 个类全部落在既有分包内：data（ProviderSql）· tool（备份、提醒、AI）"
-           "· ui（回收站、AI 配置）；未引入新模块，未改动分层。",
+           "新增 15 个类全部落在既有分包内：data（ProviderSql）· tool（备份、提醒、AI、重复规则）"
+           "· ui（回收站、AI 配置、主题）；未引入新模块，未改动分层。"
+           "M7–M9 的 ThemeHelper、ReminderRepeats 待下次渲染补入类图。",
            size=10.5, color=MUTED, line_spacing=1.3)
     d.footer(s)
     d.notes(s, "设计原则一句话：维护不另起炉灶，在原有分包里扩展；"
                "新增类都是单一职责的小类，纯逻辑类不依赖 Android 框架，所以能单测。")
 
 
-def verify_page(d: Deck) -> None:
+def closeout_page(d: Deck) -> None:
     s = d.slide()
-    d.header(s, "05 验证", "质量验证与成果演示", "全部数字可追溯到脚本与扫描报告")
-    stats = [("32", "条单测", "全部通过", TEAL),
+    d.header(s, "05 收束", "验证与团队分工", "全部数字可追溯到脚本与扫描报告")
+    stats = [("40", "条单测", "全部通过", TEAL),
              ("5.1% → 21.1%", "注释密度", "标注前后", GREEN),
              ("51 → 40", "Sonar 漏洞", "CRITICAL 2 → 0", "#B45309"),
              ("D → C", "安全评级", "修复 S5322/S5324", PURPLE),
              ("2.9% → 2.3%", "重复行密度", "新增代码无复制膨胀", TEAL)]
     x = MARGIN
     for value, label, note, color in stats:
-        d.rect(s, x, 1.86, 2.3, 2.0, fill=CARD, line=LINE, radius=0.06)
-        d.text(s, x + 0.24, 2.06, 2.0, 0.62, value, size=20, bold=True,
+        d.rect(s, x, 1.62, 2.3, 1.66, fill=CARD, line=LINE, radius=0.06)
+        d.text(s, x + 0.22, 1.76, 2.0, 0.56, value, size=19, bold=True,
                color=color, font="Consolas")
-        d.text(s, x + 0.24, 2.78, 2.0, 0.26, label, size=11, bold=True, color=NAVY)
-        d.text(s, x + 0.24, 3.08, 2.0, 0.5, note, size=10, color=MUTED)
+        d.text(s, x + 0.22, 2.4, 2.0, 0.26, label, size=10.5, bold=True, color=NAVY)
+        d.text(s, x + 0.22, 2.7, 2.0, 0.45, note, size=9.5, color=MUTED)
         x += 2.44
-    d.rect(s, MARGIN, 4.3, 11.9, 2.0, fill=SOFT, line=LINE, radius=0.06)
-    d.text(s, MARGIN + 0.35, 4.5, 11.2, 0.3, "演示：25 秒连续操作（录屏）",
-           size=11.5, bold=True, color=TEAL_DARK)
-    d.text(s, MARGIN + 0.35, 4.88, 11.2, 1.3,
-           "新建便签 → 设置提醒 → 到点通知 → 删除进回收站 → 恢复 → 导出/备份 → AI 摘要",
-           size=12, color=NAVY)
-    d.text(s, MARGIN + 0.35, 5.55, 11.2, 0.6,
-           "Android Lint 0 Error / 174 Warning；截图与日志在 logs/，"
-           "Sonar/Lint 原始报告在 docs/analysis/，统计脚本在 tools/，可现场复跑。",
-           size=10, color=MUTED)
+    d.rect(s, MARGIN, 3.44, 12.09, 0.86, fill=SOFT, line=LINE, radius=0.08)
+    d.text(s, MARGIN + 0.3, 3.54, 3.4, 0.3, "演示：25 秒连续操作（录屏）",
+           size=10.5, bold=True, color=TEAL_DARK)
+    d.text(s, MARGIN + 0.3, 3.88, 11.4, 0.3,
+           "新建便签 → 设提醒 → 到点通知 → 回收站恢复 → 导出/备份 → AI 摘要",
+           size=10.5, color=NAVY)
+    d.text(s, MARGIN, 4.52, 5.7, 0.3, "团队分工", size=11.5, bold=True,
+           color=TEAL_DARK)
+    d.bullets(s, MARGIN, 4.86, 5.7, 1.5, [
+        ("袁晨昕（组长）：", "M1–M9 维护代码、标注、PPT 与汇报"),
+        ("刘嘉：", "质量分析报告、成员分支新功能"),
+        ("罗奕峰：", "UML 图、成员分支新功能"),
+    ], size=10.5, gap=6)
+    d.text(s, 6.6, 4.52, 6.1, 0.3, "局限与仓库", size=11.5, bold=True,
+           color=TEAL_DARK)
+    d.text(s, 6.6, 4.86, 6.1, 1.7,
+           "gtask 退役包 36 个旧问题保留未修；Lint 剩余 174 个资源类 Warning 未逐条处理；"
+           "AI 仅支持 OpenAI 兼容接口。\n"
+           "9 项维护 +3,451 / −1,068 行、33 个文件；develop 领先 master 20 个提交；"
+           "报告、UML、扫描原始数据随交付包提供。",
+           size=9.5, color=MUTED, line_spacing=1.35)
+    d.text(s, MARGIN, 6.6, 9.0, 0.35, "谢谢，请老师提问", size=12.5, color=TEAL_DARK)
     d.footer(s)
     d.notes(s, "五个数字按顺序报完就进入录屏，不逐条解释；"
-               "如果老师问口径，指向 tools/ 脚本和 Sonar 的 JSON 原始输出。")
-
-
-def closing_page(d: Deck) -> None:
-    s = d.slide(NAVY)
-    d.circle(s, -2.2, 4.1, 6.8, fill=TEAL, alpha=5)
-    d.text(s, MARGIN, 1.45, 8.0, 0.85, "总结与分工", size=36, bold=True, color=WHITE)
-    d.rect(s, MARGIN, 2.4, 0.9, 0.055, fill=TEAL, shape=MSO_SHAPE.RECTANGLE)
-    d.bullets(s, MARGIN, 2.75, 5.6, 3.6, [
-        ("袁晨昕（组长）：", "架构与 M1–M3、标注、报告"),
-        ("刘嘉：", "M4 提醒重构、单测与设备回归"),
-        ("罗奕峰：", "M5 回收站、M6 AI 拓展、演示"),
-    ], size=12.5, gap=12, bullet_color=TEAL, color="FFFFFF")
-    d.text(s, 6.6, 1.5, 5.9, 0.3, "仓库与文档", size=11.5, bold=True, color=CYAN)
-    d.bullets(s, 6.6, 1.9, 5.9, 3.2, [
-        "master / develop / 三个成员分支，13 次提交",
-        "6 项维护共 +2,836 / −1,045 行，25 个文件",
-        "报告、UML、扫描原始数据随交付包提供",
-    ], size=12, gap=10, bullet_color=CYAN, color="D6E8EE")
-    d.text(s, 6.6, 4.6, 5.9, 1.4,
-           "局限：gtask 退役包 36 个旧问题保留未修；Lint 剩余 174 个资源类 Warning "
-           "未逐条处理；AI 仅支持 OpenAI 兼容接口。",
-           size=10.5, color="9FC7D2", line_spacing=1.3)
-    d.text(s, MARGIN, 6.55, 9.0, 0.4, "谢谢，请老师提问", size=13, color="9FC7D2")
-    d.footer(s, dark=True)
-    d.notes(s, "最后 30 秒讲分工与局限；局限主动说出来，比被问到好。")
+               "如果老师问口径，指向 tools/ 脚本和 Sonar 的 JSON 原始输出。"
+               "最后 30 秒讲分工与局限；局限主动说出来，比被问到好。"
+               "【待更新】成员功能提交后，分工与数字需同步（Sonar/Lint 重扫、维护代码量重跑）。")
 
 
 def build(out: Path) -> Path:
@@ -259,9 +286,9 @@ def build(out: Path) -> Path:
     provider_page(d)
     reminder_trash_page(d)
     ai_page(d)
+    experience_page(d)
     class_diagram_page(d)
-    verify_page(d)
-    closing_page(d)
+    closeout_page(d)
     path = d.save(out)
     print(f"built: {path} ({len(d.prs.slides)} slides)")
     return path

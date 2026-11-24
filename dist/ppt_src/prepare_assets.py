@@ -19,6 +19,8 @@ SHOTS = {
     "m4_notification.png": "shot_notification.png",
     "m5_trash_list.png": "shot_trash.png",
     "m6_ai_result.png": "shot_ai.png",
+    "m7_dark_list.png": "shot_dark.png",
+    "m8_pinned_list.png": "shot_pinned.png",
 }
 
 
