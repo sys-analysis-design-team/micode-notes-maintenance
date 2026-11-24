@@ -253,6 +253,37 @@ public class DataUtils {
     }
 
     /**
+     * 批量设置/取消置顶（M8）。
+     *
+     * <p>与批量移动一致走 applyBatch：一次事务写入所有选中便签，
+     * 失败时整体回滚，避免只置顶一部分。只改 pinned 列，不触碰 modified_date，
+     * 置顶操作不应改变便签自身的修改时间语义。</p>
+     *
+     * @param resolver 内容解析器
+     * @param ids 选中的便签 ID 集合；空集合直接视为成功
+     * @param pinned true 置顶，false 取消置顶
+     * @return true 表示全部写入成功
+     */
+    public static boolean setPinnedNotes(ContentResolver resolver, HashSet<Long> ids,
+            boolean pinned) {
+        if (ids == null || ids.isEmpty()) {
+            return true;
+        }
+        ArrayList<ContentProviderOperation> operationList = new ArrayList<ContentProviderOperation>();
+        for (long id : ids) {
+            if (id <= 0) {
+                Log.e(TAG, "Skip invalid note id: " + id);
+                continue;
+            }
+            ContentProviderOperation.Builder builder = ContentProviderOperation
+                    .newUpdate(ContentUris.withAppendedId(Notes.CONTENT_NOTE_URI, id));
+            builder.withValue(NoteColumns.PINNED, pinned ? 1 : 0);
+            operationList.add(builder.build());
+        }
+        return applyOperations(resolver, operationList);
+    }
+
+    /**
      * Get the all folder count except system folders {@link Notes#TYPE_SYSTEM}}
      */
     public static int getUserFolderCount(ContentResolver resolver) {

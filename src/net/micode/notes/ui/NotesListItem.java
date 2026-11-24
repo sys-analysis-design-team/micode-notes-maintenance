@@ -46,6 +46,8 @@ import net.micode.notes.tool.ResourceParser.NoteItemBgResources;
 public class NotesListItem extends LinearLayout {
     // 子控件在构造时一次查找，之后只改文本、可见性与图片
     private ImageView mAlert;
+    // M8：置顶标记，绑定数据时按 isPinned() 显示/隐藏
+    private ImageView mPinned;
     private TextView mTitle;
     private TextView mTime;
     private TextView mCallName;
@@ -60,6 +62,7 @@ public class NotesListItem extends LinearLayout {
         super(context);
         inflate(context, R.layout.note_item, this);
         mAlert = (ImageView) findViewById(R.id.iv_alert_icon);
+        mPinned = (ImageView) findViewById(R.id.iv_pinned);
         mTitle = (TextView) findViewById(R.id.tv_title);
         mTime = (TextView) findViewById(R.id.tv_time);
         mCallName = (TextView) findViewById(R.id.tv_name);
@@ -88,6 +91,8 @@ public class NotesListItem extends LinearLayout {
         }
 
         mItemData = data;
+        // 置顶标记与行模板无关，每次绑定都显式刷新，避免行复用残留
+        mPinned.setVisibility(data.isPinned() ? View.VISIBLE : View.GONE);
         // 形态一：通话记录系统文件夹本身，显示电话图标与“通话记录(N)”计数
         if (data.getId() == Notes.ID_CALL_RECORD_FOLDER) {
             mCallName.setVisibility(View.GONE);

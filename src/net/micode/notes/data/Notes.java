@@ -210,6 +210,15 @@ public class Notes {
          * <P> Type : INTEGER (long) </P>
          */
         public static final String VERSION = "version";
+
+        /**
+         * Whether the note is pinned to the top of the list
+         * <P> Type : INTEGER (0 = normal, 1 = pinned) </P>
+         *
+         * <p>中文（M8 便签置顶）：置顶标志，数据库 v5 新增列。只对普通便签有意义，
+         * 文件夹行恒为 0；列表查询按该列降序排序，置顶便签排在非置顶之前。</p>
+         */
+        public static final String PINNED = "pinned";
     }
 
     public interface DataColumns {

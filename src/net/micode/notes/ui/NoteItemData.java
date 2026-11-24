@@ -57,6 +57,7 @@ public class NoteItemData {
         NoteColumns.TYPE,
         NoteColumns.WIDGET_ID,
         NoteColumns.WIDGET_TYPE,
+        NoteColumns.PINNED,
     };
 
     // 与上方 PROJECTION 顺序对应的列下标
@@ -72,6 +73,7 @@ public class NoteItemData {
     private static final int TYPE_COLUMN                  = 9;
     private static final int WIDGET_ID_COLUMN             = 10;
     private static final int WIDGET_TYPE_COLUMN           = 11;
+    private static final int PINNED_COLUMN                = 12;
 
     // note 表当前行的字段快照
     private long mId;
@@ -86,6 +88,8 @@ public class NoteItemData {
     private int mType;
     private int mWidgetId;
     private int mWidgetType;
+    // 置顶标志（M8）：1 表示置顶；文件夹行恒为 0
+    private boolean mPinned;
     // 仅通话记录相关行使用：号码来自 data 表，名称由联系人查询解析（失败时退回号码）
     private String mName;
     private String mPhoneNumber;
@@ -127,6 +131,7 @@ public class NoteItemData {
         mType = cursor.getInt(TYPE_COLUMN);
         mWidgetId = cursor.getInt(WIDGET_ID_COLUMN);
         mWidgetType = cursor.getInt(WIDGET_TYPE_COLUMN);
+        mPinned = (cursor.getInt(PINNED_COLUMN) > 0);
 
         mPhoneNumber = "";
         // 只有“通话记录”系统文件夹下的便签才需要号码/联系人；
@@ -342,6 +347,13 @@ public class NoteItemData {
     }
 
     /**
+     * @return 便签是否置顶（M8）；列表中的置顶便签会显示图钉标记并排在非置顶便签之前
+     */
+    public boolean isPinned() {
+        return mPinned;
+    }
+
+    /**
      * 是否是一条有效的通话记录便签。
      *
      * <p>除父文件夹必须是通话记录文件夹外，还要求号码非空：实际数据中可能存在
@@ -364,5 +376,18 @@ public class NoteItemData {
      */
     public static int getNoteType(Cursor cursor) {
         return cursor.getInt(TYPE_COLUMN);
+    }
+
+    /**
+     * 直接读取 Cursor 当前行的置顶标志，不构造快照、不移动 Cursor。
+     *
+     * <p>供适配器判断“选中的便签是否已全部置顶”，从而决定批量操作是置顶还是取消置顶。
+     * 前提同 {@link #getNoteType(Cursor)}：列集合必须与 {@link #PROJECTION} 一致。</p>
+     *
+     * @param cursor 已定位在当前行的查询结果
+     * @return true 表示该行已置顶
+     */
+    public static boolean isPinned(Cursor cursor) {
+        return cursor.getInt(PINNED_COLUMN) > 0;
     }
 }

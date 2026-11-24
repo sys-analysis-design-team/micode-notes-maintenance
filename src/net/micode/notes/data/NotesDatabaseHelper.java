@@ -45,7 +45,7 @@ public class NotesDatabaseHelper extends SQLiteOpenHelper {
 
     // 结构版本：1 初始结构、2 删表重建、3 增加 gtask_id 与回收站文件夹、4 增加 version 列。
     // 改表结构必须同步 upgradeToVx()，否则老用户会停留在旧结构上。
-    private static final int DB_VERSION = 4;
+    private static final int DB_VERSION = 5;
 
     // 表名常量：建表 SQL、触发器、Provider 都从这里拼接，避免表名字符串散落各处
     public interface TABLE {
@@ -82,7 +82,9 @@ public class NotesDatabaseHelper extends SQLiteOpenHelper {
             NoteColumns.LOCAL_MODIFIED + " INTEGER NOT NULL DEFAULT 0," +
             NoteColumns.ORIGIN_PARENT_ID + " INTEGER NOT NULL DEFAULT 0," +
             NoteColumns.GTASK_ID + " TEXT NOT NULL DEFAULT ''," +
-            NoteColumns.VERSION + " INTEGER NOT NULL DEFAULT 0" +
+            NoteColumns.VERSION + " INTEGER NOT NULL DEFAULT 0," +
+            // v5 起：置顶标志，0 普通 / 1 置顶；老数据默认 0
+            NoteColumns.PINNED + " INTEGER NOT NULL DEFAULT 0" +
         ")";
 
     // data 表：一条便签可有多行数据，用 mime_type 区分业务类型；data1~data5 是多态列——
@@ -437,14 +439,19 @@ public class NotesDatabaseHelper extends SQLiteOpenHelper {
             oldVersion++;
         }
 
+        if (oldVersion == 4) {
+            upgradeToV5(db);
+            oldVersion++;
+        }
+
         if (reCreateTriggers) {
             reCreateNoteTableTriggers(db);
             reCreateDataTableTriggers(db);
         }
 
         // 版本号没有推进到 newVersion 说明迁移分支缺失，直接抛异常而不是带病运行；
-        // 注意：v1 分支只把 oldVersion 推到 2 且跳过 V3，在 DB_VERSION=4 下无法走到这里，
-        // 即 v1 直升 v4 的路径实际不可用，属于历史遗留分支
+        // 注意：v1 分支只把 oldVersion 推到 2 且跳过后续分支，在 DB_VERSION=5 下无法走到这里，
+        // 即 v1 直升 v5 的路径实际不可用，属于历史遗留分支
         if (oldVersion != newVersion) {
             throw new IllegalStateException("Upgrade notes database to version " + newVersion
                     + "fails");
@@ -491,6 +498,16 @@ public class NotesDatabaseHelper extends SQLiteOpenHelper {
     private void upgradeToV4(SQLiteDatabase db) {
         // 默认 0 表示从未同步过；列只增不改，老数据自然取默认值
         db.execSQL("ALTER TABLE " + TABLE.NOTE + " ADD COLUMN " + NoteColumns.VERSION
+                + " INTEGER NOT NULL DEFAULT 0");
+    }
+
+    /**
+     * v4→v5：追加 pinned 列，支持便签置顶（M8）。
+     *
+     * <p>纯新增列，不改动任何触发器定义；老数据默认 0（未置顶），升级后行为与升级前一致。</p>
+     */
+    private void upgradeToV5(SQLiteDatabase db) {
+        db.execSQL("ALTER TABLE " + TABLE.NOTE + " ADD COLUMN " + NoteColumns.PINNED
                 + " INTEGER NOT NULL DEFAULT 0");
     }
 }

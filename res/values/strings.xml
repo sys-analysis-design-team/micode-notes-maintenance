@@ -95,6 +95,10 @@
     <string name="menu_search">Search</string>
     <string name="menu_delete">Delete</string>
     <string name="menu_move">Move to folder</string>
+    <string name="menu_pin">Pin</string>
+    <string name="toast_notes_pinned">Pinned %d note(s)</string>
+    <string name="toast_notes_unpinned">Unpinned %d note(s)</string>
+    <string name="toast_pin_failed">Failed to update pin state</string>
     <string name="menu_select_title">%d selected</string>
     <string name="menu_select_none">Nothing selected, the operation is invalid</string>
     <string name="menu_select_all">Select all</string>

@@ -273,6 +273,8 @@ public class NotesListActivity extends Activity implements OnClickListener, OnIt
         public boolean onCreateActionMode(ActionMode mode, Menu menu) {
             getMenuInflater().inflate(R.menu.note_list_options, menu);
             menu.findItem(R.id.delete).setOnMenuItemClickListener(this);
+            // M8：置顶菜单项；点击时按选中便签的整体状态决定是置顶还是取消置顶
+            menu.findItem(R.id.pin).setOnMenuItemClickListener(this);
             mMoveMenu = menu.findItem(R.id.move);
             if (mFocusNoteDataItem.getParentId() == Notes.ID_CALL_RECORD_FOLDER
                     || DataUtils.getUserFolderCount(mContentResolver) == 0) {
@@ -371,11 +373,35 @@ public class NotesListActivity extends Activity implements OnClickListener, OnIt
                 builder.show();
             } else if (itemId == R.id.move) {
                 startQueryDestinationFolders();
+            } else if (itemId == R.id.pin) {
+                togglePinnedSelection();
             } else {
                 return false;
             }
             return true;
         }
+    }
+
+    /**
+     * 批量置顶/取消置顶（M8）。
+     *
+     * <p>切换语义：选中的便签全部已置顶时执行取消置顶，否则全部置顶——
+     * 与常见邮件客户端的“星标/置顶”交互一致，无需为两个方向各设一个菜单项。
+     * 成功后退出多选并重新查询，让 PINNED 排序立即生效。</p>
+     */
+    private void togglePinnedSelection() {
+        HashSet<Long> ids = mNotesListAdapter.getSelectedItemIds();
+        boolean pin = !mNotesListAdapter.isAllSelectedPinned();
+        if (!DataUtils.setPinnedNotes(mContentResolver, ids, pin)) {
+            Toast.makeText(this, R.string.toast_pin_failed, Toast.LENGTH_SHORT).show();
+            return;
+        }
+        Toast.makeText(this,
+                getString(pin ? R.string.toast_notes_pinned : R.string.toast_notes_unpinned,
+                        ids.size()),
+                Toast.LENGTH_SHORT).show();
+        mModeCallBack.finishActionMode();
+        startAsyncNotesListQuery();
     }
 
     private class NewNoteOnTouchListener implements OnTouchListener {
@@ -446,7 +472,8 @@ public class NotesListActivity extends Activity implements OnClickListener, OnIt
         mBackgroundQueryHandler.startQuery(FOLDER_NOTE_LIST_QUERY_TOKEN, null,
                 Notes.CONTENT_NOTE_URI, NoteItemData.PROJECTION, selection, new String[] {
                     String.valueOf(mCurrentFolderId)
-                }, NoteColumns.TYPE + " DESC," + NoteColumns.MODIFIED_DATE + " DESC");
+                }, NoteColumns.TYPE + " DESC," + NoteColumns.PINNED + " DESC,"
+                        + NoteColumns.MODIFIED_DATE + " DESC");
     }
 
     private final class BackgroundQueryHandler extends AsyncQueryHandler {

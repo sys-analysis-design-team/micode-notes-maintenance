@@ -46,6 +46,16 @@
                 android:layout_height="wrap_content"
                 android:layout_gravity="center_vertical">
 
+                <!-- M8：置顶标记，仅置顶便签可见；不占位时 visibility=gone -->
+                <ImageView
+                    android:id="@+id/iv_pinned"
+                    android:layout_width="16dip"
+                    android:layout_height="16dip"
+                    android:layout_gravity="center_vertical"
+                    android:layout_marginRight="4dip"
+                    android:src="@drawable/ic_pin"
+                    android:visibility="gone" />
+
                 <TextView
                     android:id="@+id/tv_title"
                     android:layout_width="0dip"

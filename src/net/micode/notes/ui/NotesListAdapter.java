@@ -239,6 +239,32 @@ public class NotesListAdapter extends CursorAdapter {
     }
 
     /**
+     * 已勾选的便签是否全部处于置顶状态（M8）。
+     *
+     * <p>批量置顶按“全已置顶则取消、否则置顶”的切换语义工作，
+     * 需要一个整体判断。selectedCount 为 0 时返回 false，由调用方先拦截“未选择”提示。</p>
+     *
+     * @return true 表示至少选中一条且全部已置顶
+     */
+    public boolean isAllSelectedPinned() {
+        int selectedCount = 0;
+        for (Integer position : mSelectedIndex.keySet()) {
+            if (mSelectedIndex.get(position) == true) {
+                Cursor c = (Cursor) getItem(position);
+                if (c == null) {
+                    Log.e(TAG, "Invalid cursor");
+                    return false;
+                }
+                if (!NoteItemData.isPinned(c)) {
+                    return false;
+                }
+                selectedCount++;
+            }
+        }
+        return selectedCount > 0;
+    }
+
+    /**
      * 是否所有“可选便签”都已勾选。
      *
      * <p>checkedCount != 0 是必要保护：空列表时 0 == mNotesCount 也成立，
