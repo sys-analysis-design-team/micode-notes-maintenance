@@ -27,7 +27,7 @@ officegen review 小米便签开源软件维护.pptx --pdf --images renders --co
 6. 拓展：M4 提醒 / M9 重复提醒 / M5 回收站
 7. 拓展：M6 AI 摘要
 8. 拓展：M7 深色 / M8 置顶 + **团队新功能占位（刘嘉、罗奕峰两个卡）**
-9. 设计：维护后类图（M7–M9 两个新类待下次渲染补入）
+9. 设计：维护后类图（已含 M7 的 ThemeHelper、M9 的 ReminderRepeats）
 10. 收束：验证数字 + 团队分工 + 局限
 
 每页都有讲稿备注，演示者视图可直接读。
@@ -35,7 +35,9 @@ officegen review 小米便签开源软件维护.pptx --pdf --images renders --co
 **团队新功能回填点**（成员功能提交后）：
 - 第 8 页右侧两个占位卡：换成实际功能名 + 一句话说明；
 - 第 10 页分工：成员一行补功能名，维护代码量重跑 `tools/count_maintenance.py`；
-- 若新功能新增类，重新渲染类图后替换第 9 页。
+- 若新功能新增类，重新渲染类图（`docs/uml/class_after.puml`）后替换第 9 页；
+- 数字刷新：Lint 跑 `sh gradlew lintDebug`，Sonar 跑 `python tools/scan_sonar.py`（需本机
+  SonarQube 在 localhost:9000 运行）。
 
 ## 截图加工
 

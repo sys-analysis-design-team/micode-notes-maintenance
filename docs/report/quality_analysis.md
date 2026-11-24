@@ -152,11 +152,12 @@ Google Tasks 云同步。工程不含构建脚本、不含任何测试代码、�
 | 项目 | 扫描对象 | 提交 |
 |---|---|---|
 | `micode-notes-base` | 原始代码（39 文件） | `1098a1e` |
-| `micode-notes` | 维护后代码（51 文件） | `3917b03` |
+| `micode-notes` | 维护后代码（53 文件） | `572779b` |
 
 工具：SonarQube Community Build 26.11.0 + SonarScanner CLI 8.5.0，
-规则集为内置 Sonar way（Java），JDK 21，原始输出存于
-`docs/analysis/sonar/`（`measures_base.json`、`measures_after.json`、`summary.md`）。
+规则集为内置 Sonar way（Java），JDK 21，2026-11-24 在 9 项维护全部完成后重扫，
+原始输出存于 `docs/analysis/sonar/`（`measures_base.json`、`measures_after.json`、
+`summary.md`），扫描脚本 `tools/scan_sonar.py`。
 
 ### 4.2 原始代码的扫描结果
 
@@ -180,11 +181,11 @@ Google Tasks 云同步。工程不含构建脚本、不含任何测试代码、�
 
 | 指标 | 原始代码 | 维护后 | 变化 |
 |---|---|---|---|
-| 文件 / 类 / 方法 | 39 / 65 / 471 | 51 / 80 / 557 | +12 / +15 / +86 |
-| 代码行（ncloc） | 7,395 | 8,696 | +1,301 |
-| 注释行 / 密度 | 401 / 5.1% | 2,332 / 21.1% | **+1,931 / +16.0pp** |
-| 圈复杂度 / 认知复杂度 | 1,325 / 1,403 | 1,645 / 1,622 | +320 / +219 |
-| 重复行密度 | 2.9% | 2.3% | -0.6pp |
+| 文件 / 类 / 方法 | 39 / 65 / 471 | 53 / 82 / 584 | +14 / +17 / +113 |
+| 代码行（ncloc） | 7,395 | 9,014 | +1,619 |
+| 注释行 / 密度 | 401 / 5.1% | 2,448 / 21.4% | **+2,047 / +16.3pp** |
+| 圈复杂度 / 认知复杂度 | 1,325 / 1,403 | 1,718 / 1,676 | +393 / +273 |
+| 重复行密度 | 2.9% | 2.2% | -0.7pp |
 | 问题总数 | 53 | 42 | **-11** |
 | 漏洞 | 51 | 40 | **-11** |
 | Bug | 2 | 2 | 0 |
@@ -192,14 +193,17 @@ Google Tasks 云同步。工程不含构建脚本、不含任何测试代码、�
 | 安全性评级 | **D** | **C** | **+1 级** |
 | 可维护性评级 | A | A | 持平 |
 
+口径说明：Sonar 的「类」计数包含内部类与匿名类，与新增源文件数（15 个）不是同一口径；
+文件数 39 → 53 是 `src/` 下的 `.java` 源文件。
+
 变化的主要原因：
 
 - **注释密度翻四倍**来自代码标注（新增 3,080 行注释中的大部分落在 ncloc 统计范围外，
-  注释行从 401 增至 2,332）。
+  注释行从 401 增至 2,448）。
 - **漏洞减少 11 个、安全性从 D 升到 C**：两个 CRITICAL（S5322 广播接收器、
   S5324 外部存储）随 M1/M3 修复消失；S4507 调试输出由 42 降到 33（M1 清理了
   同步链路的部分日志）。
-- **复杂度上升**属预期：新增 13 个类与 AI/备份链路带来新逻辑；
+- **复杂度上升**属预期：新增 15 个类与 AI/备份/重复提醒链路带来新逻辑；
   但重复率反而从 2.9% 降到 2.3%，说明新增代码没有复制粘贴式膨胀。
 
 维护后扫描剩余 42 个问题的分布仍然集中在退役代码：
@@ -219,15 +223,17 @@ Google Tasks 云同步。工程不含构建脚本、不含任何测试代码、�
 | `Orientation` | `res/layout/note_edit.xml:86` | 单子元素 LinearLayout 补 `android:orientation="vertical"` |
 | `MissingTranslation` ×4 | `strings.xml` | 原始代码缺 4 条中文翻译，补入 `values-zh-rCN` |
 
-剩余 174 个 Warning 主要集中在资源与国际化层面：
-`UnusedResources` 34、`RtlHardcoded` 32、`ContentDescription` 26、
-`TypographyEllipsis` 15、`StaticFieldLeak` 12。这些属于老工程的资源遗留，
-不影响功能正确性，记录在 `docs/analysis/lint/`（原始 txt 与 HTML 报告）。
+剩余 Warning 主要集中在资源与国际化层面（M6 时 174 条；9 项维护完成后重扫为
+178 条，M7–M9 新增 4 条）：`UnusedResources` 34、`RtlHardcoded` 33、
+`ContentDescription` 27、`TypographyEllipsis` 15、`StaticFieldLeak` 12。
+这些属于老工程的资源遗留，不影响功能正确性，记录在 `docs/analysis/lint/`
+（原始 txt 与 HTML 报告）。
 
 ### 4.5 单元测试与动态验证
 
-- JVM 单元测试 32 条：`ProviderSqlTest` 7、`NoteBackupCodecTest` 9、
-  `AiResultParserTest` 8、`LocalNoteAnalyzerTest` 8，全部通过。
+- JVM 单元测试 40 条：`ProviderSqlTest` 7、`NoteBackupCodecTest` 9、
+  `AiResultParserTest` 8、`LocalNoteAnalyzerTest` 8、`ReminderRepeatsTest` 8，
+  全部通过。
 - 动态验证：Pixel_7（Android 17 / API 37）模拟器逐功能回归，
-  覆盖列表、编辑、提醒、通知、回收站、备份恢复、AI 分析七个场景，
-  截图见 `logs/`（清单见维护报告 3.4 节）。
+  覆盖列表、编辑、提醒（含重复）、通知、回收站、备份恢复、AI 分析、
+  深色模式与置顶九个场景，截图见 `logs/`（清单见维护报告 3.4 节）。

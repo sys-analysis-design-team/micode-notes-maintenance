@@ -29,6 +29,9 @@ rectangle "小米便签（维护后）" {
   usecase "回收站恢复/彻底删除" as UC13 #D4EDDA
   usecase "AI 摘要与待办提取" as UC14 #D4EDDA
   usecase "配置 AI 接口" as UC15 #D4EDDA
+  usecase "深色主题切换" as UC16 #D4EDDA
+  usecase "便签置顶" as UC17 #D4EDDA
+  usecase "设置重复提醒" as UC18 #D4EDDA
 }
 
 User --> UC1
@@ -45,7 +48,11 @@ User --> UC12
 User --> UC13
 User --> UC14
 User --> UC15
+User --> UC16
+User --> UC17
+User --> UC18
 
+UC18 ..> UC6 : «extend»
 UC6 --> Alarm : 通知提醒
 UC7 --> Widget : 桌面展示
 UC8 --> Contacts : 号码查姓名

@@ -9,6 +9,7 @@ skinparam class {
 package "ui" {
   class NotesListActivity #FFE8CC {
     +备份/恢复/回收站/导出菜单
+    +置顶菜单
   }
   class NoteEditActivity #FFE8CC {
     +提醒设置
@@ -21,6 +22,11 @@ package "ui" {
   }
   class AiSettingsActivity #D4EDDA {
     +配置 endpoint/model/key
+  }
+  class ThemeHelper #D4EDDA {
+    +apply(activity)
+    +setMode()
+    +recreateIfThemeChanged()
   }
   class AlarmReceiver #FFE8CC {
     +onReceive
@@ -46,7 +52,13 @@ package "tool" {
     +schedule()
     +cancel()
     +rescheduleAll()
+    +advanceRepeat()
     +canScheduleExactAlarms()
+  }
+  class ReminderRepeats #D4EDDA {
+    +nextTrigger(alertDate, rule, now)
+    +isRepeating(rule)
+    +label(rule)
   }
   class ReminderNotifier #D4EDDA {
     +notify()
@@ -78,7 +90,9 @@ package "data" {
   class ProviderSql #D4EDDA {
     +构造参数化 SQL
   }
-  class NotesDatabaseHelper
+  class NotesDatabaseHelper {
+    +版本 v6（pinned、repeat_rule）
+  }
 }
 
 NotesListActivity --> TrashActivity
@@ -87,14 +101,21 @@ NotesListActivity ..> BackupUtils
 NotesListActivity ..> NoteBackupCodec
 NotesListActivity ..> ReminderScheduler
 NotesListActivity ..> ReminderNotifier
+NotesListActivity ..> ThemeHelper
+NoteEditActivity ..> ThemeHelper
+TrashActivity ..> ThemeHelper
+AiSettingsActivity ..> ThemeHelper
 
 NoteEditActivity ..> AiClient
 NoteEditActivity ..> AiSettings
 NoteEditActivity ..> LocalNoteAnalyzer
 NoteEditActivity ..> ReminderScheduler
 NoteEditActivity ..> ReminderNotifier
+NoteEditActivity ..> ReminderRepeats
 
+ReminderScheduler ..> ReminderRepeats
 AlarmReceiver ..> ReminderNotifier
+AlarmReceiver ..> ReminderScheduler
 AlarmReceiver ..> NotesProvider
 
 AiClient ..> AiSettings

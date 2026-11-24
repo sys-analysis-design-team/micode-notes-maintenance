@@ -220,11 +220,11 @@ def experience_page(d: Deck) -> None:
 def class_diagram_page(d: Deck) -> None:
     s = d.slide()
     d.header(s, "05 设计", "维护后架构与类设计", "新增类绿色、重构类橙色，分层不变")
-    d.picture(s, str(ASSETS / "class_after.png"), MARGIN, 1.72, w=11.9)
-    d.text(s, MARGIN, 6.28, 11.9, 0.55,
+    d.picture(s, str(ASSETS / "class_after.png"), 0.97, 1.68, w=11.4)
+    d.text(s, MARGIN, 6.30, 12.09, 0.55,
            "新增 15 个类全部落在既有分包内：data（ProviderSql）· tool（备份、提醒、AI、重复规则）"
            "· ui（回收站、AI 配置、主题）；未引入新模块，未改动分层。"
-           "M7–M9 的 ThemeHelper、ReminderRepeats 待下次渲染补入类图。",
+           "M7–M9 的 ThemeHelper 与 ReminderRepeats 已并入类图。",
            size=10.5, color=MUTED, line_spacing=1.3)
     d.footer(s)
     d.notes(s, "设计原则一句话：维护不另起炉灶，在原有分包里扩展；"
@@ -235,10 +235,10 @@ def closeout_page(d: Deck) -> None:
     s = d.slide()
     d.header(s, "05 收束", "验证与团队分工", "全部数字可追溯到脚本与扫描报告")
     stats = [("40", "条单测", "全部通过", TEAL),
-             ("5.1% → 21.1%", "注释密度", "标注前后", GREEN),
+             ("5.1% → 21.4%", "注释密度", "标注前后", GREEN),
              ("51 → 40", "Sonar 漏洞", "CRITICAL 2 → 0", "#B45309"),
              ("D → C", "安全评级", "修复 S5322/S5324", PURPLE),
-             ("2.9% → 2.3%", "重复行密度", "新增代码无复制膨胀", TEAL)]
+             ("2.9% → 2.2%", "重复行密度", "新增代码无复制膨胀", TEAL)]
     x = MARGIN
     for value, label, note, color in stats:
         d.rect(s, x, 1.62, 2.3, 1.66, fill=CARD, line=LINE, radius=0.06)
@@ -263,9 +263,9 @@ def closeout_page(d: Deck) -> None:
     d.text(s, 6.6, 4.52, 6.1, 0.3, "局限与仓库", size=11.5, bold=True,
            color=TEAL_DARK)
     d.text(s, 6.6, 4.86, 6.1, 1.7,
-           "gtask 退役包 36 个旧问题保留未修；Lint 剩余 174 个资源类 Warning 未逐条处理；"
+           "gtask 退役包 36 个旧问题保留未修；Lint 剩余 178 个资源类 Warning 未逐条处理；"
            "AI 仅支持 OpenAI 兼容接口。\n"
-           "9 项维护 +3,451 / −1,068 行、33 个文件；develop 领先 master 20 个提交；"
+           "9 项维护 +3,451 / −1,068 行、33 个文件；develop 领先 master 24 个提交；"
            "报告、UML、扫描原始数据随交付包提供。",
            size=9.5, color=MUTED, line_spacing=1.35)
     d.text(s, MARGIN, 6.6, 9.0, 0.35, "谢谢，请老师提问", size=12.5, color=TEAL_DARK)

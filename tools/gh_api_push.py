@@ -125,10 +125,16 @@ def main() -> int:
             tree_items.append({"path": path, "mode": "100644", "type": "blob", "sha": None})
             print(f"DELETED {path}")
             continue
-        full = REPO_ROOT / path
-        content = base64.b64encode(full.read_bytes()).decode("ascii")
+        # 从 git 对象读 blob（而不是工作区文件）：core.autocrlf=true 时工作区是
+        # CRLF、仓库内是 LF，直接读文件会把整份文件变成 CRLF 版本，树对不上。
+        blob_sha = git("rev-parse", f"{local_sha}:{path}").strip()
+        content = subprocess.run(["git", "cat-file", "blob", blob_sha],
+                                 capture_output=True, cwd=REPO_ROOT, check=True).stdout
+        encoded = base64.b64encode(content).decode("ascii")
         blob = api(token, "POST", f"/repos/{args.repo}/git/blobs",
-                   {"content": content, "encoding": "base64"})
+                   {"content": encoded, "encoding": "base64"})
+        if blob["sha"] != blob_sha:
+            print(f"WARN blob sha mismatch: local={blob_sha[:8]} remote={blob['sha'][:8]}")
         tree_items.append({"path": path, "mode": "100644", "type": "blob", "sha": blob["sha"]})
         print(f"BLOB {path} {blob['sha'][:8]}")
 

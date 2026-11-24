@@ -1,15 +1,17 @@
 # Android Lint 结果摘要（维护后代码，AGP 9.0）
 
-修复 6 个 Error 后：0 Error / 174 Warning。
+> 2026-11-24 重扫（M1–M9 全部完成后）：0 Error / 178 Warning。
+> M6 时首轮 180 个问题（6 Error / 174 Warning），修复 6 个 Error 后为 174 Warning；
+> M7–M9 新增 4 条（RtlHardcoded +1、ContentDescription +1、PluralsCandidate +2）。
 
 | 规则 | 数量 |
 |---|---|
 | UnusedResources | 34 |
-| RtlHardcoded | 32 |
-| ContentDescription | 26 |
+| RtlHardcoded | 33 |
+| ContentDescription | 27 |
 | TypographyEllipsis | 15 |
 | StaticFieldLeak | 12 |
-| PluralsCandidate | 6 |
+| PluralsCandidate | 8 |
 | UseCompoundDrawables | 4 |
 | Overdraw | 4 |
 | Autofill | 4 |

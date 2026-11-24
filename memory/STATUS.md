@@ -29,12 +29,12 @@
 | JVM 单元测试 | ✅ 40/40 | `ProviderSqlTest` 7 + `NoteBackupCodecTest` 9 + `AiResultParserTest` 8 + `LocalNoteAnalyzerTest` 8 + `ReminderRepeatsTest` 8 |
 | 远端小组仓库 | ✅ | `https://github.com/sys-analysis-design-team/micode-notes-maintenance`，五个分支已推送 |
 | 代码标注（38 个原始类） | ✅ 提交 `3917b03` | 3,080 行注释 / 覆盖 5,135 行代码；`docs/analysis/annotation_stats.md`、`annotation_coverage.md` |
-| 维护代码量统计 | ✅ | 6 项维护、2,836 新增 / 1,045 删除 / 3,881 行受影响、25 文件；`docs/analysis/maintenance_stats.md` |
-| 两份报告 | ✅ 初稿完成 | `docs/report/quality_analysis.md`（4 章齐）、`reading_annotation_maintenance.md`（1–5 章齐，第 5 章为草稿） |
-| Android Lint | ✅ 0 Error / 174 Warning | `docs/analysis/lint/`（txt + html + summary）；修复 6 个 Error |
-| SonarQube 扫描（前后对比） | ✅ | `docs/analysis/sonar/`；原始 53 问题/安全 D → 维护后 42 问题/安全 C；注释密度 5.1%→21.1% |
-| UML 图（PlantUML） | ✅ | `docs/uml/`：用例图×2、包图×2、维护后类图，PNG 已渲染 |
-| 成果 PPT 10 页 | ✅ v2 初版（2026-11-24） | `dist/小米便签开源软件维护.pptx` + PDF；源在 `dist/ppt_src/`；10 页重排：M9 并入第 6 页、新增第 8 页（M7/M8 + 刘嘉/罗奕峰占位卡）、验证与总结并为第 10 页；视觉评审 PASS 0 错误 |
+| 维护代码量统计 | ✅ | 9 项维护、3,451 新增 / 1,068 删除 / 4,519 行受影响、33 文件；`docs/analysis/maintenance_stats.md` |
+| 两份报告 | ✅ 初稿完成（第 3 章已同步 M7–M9） | `docs/report/quality_analysis.md`（4 章齐）、`reading_annotation_maintenance.md`（1–5 章齐）；9 项维护表、4,519 churn、15 类/1,259 行、40 单测、Lint 178、Sonar 重扫 |
+| Android Lint | ✅ 0 Error / 178 Warning | `docs/analysis/lint/`（txt + html + summary，2026-11-24 重扫）；M6 时 174，M7–M9 新增 4 条 |
+| SonarQube 扫描（前后对比） | ✅ 2026-11-24 重扫 | `docs/analysis/sonar/`；原始 53 问题/安全 D → 维护后 42 问题/安全 C；注释密度 5.1%→21.4%、重复率 2.9%→2.2%；脚本 `tools/scan_sonar.py` |
+| UML 图（PlantUML） | ✅ 已补 M7–M9 | `docs/uml/`：用例图×2（新增 3 个用例）、包图×2、维护后类图（含 ThemeHelper/ReminderRepeats），PNG 已重渲染 |
+| 成果 PPT 10 页 | ✅ v2 初版（2026-11-24） | `dist/小米便签开源软件维护.pptx` + PDF；源在 `dist/ppt_src/`；10 页重排：M9 并入第 6 页、新增第 8 页（M7/M8 + 刘嘉/罗奕峰占位卡）、验证与总结并为第 10 页；第 9 页已换新类图、第 10 页数字刷新；视觉评审 PASS 0 错误 |
 
 ## 三、维护项
 
@@ -59,9 +59,12 @@
 - 工程结构：`src/`、`res/`、`AndroidManifest.xml` 保持在根目录，符合作业要求
 - 构建命令：`sh gradlew assembleDebug`
 - 安装启动：`adb install -r build/outputs/apk/debug/micode-notes-debug.apk`
-- SonarQube：`D:\AI\Tools\sonarqube-26.11.0.134175`，数据目录 `D:\AI\Tools\sq-data-2`，
-  启动 `bin\windows-x86-64\StartSonar.bat`（需 JAVA_HOME=JDK 21），端口 9000；扫描器在 `D:\AI\Tools\sonar-scanner-8.5.0.16571-windows-x64`。
-  2026-11-23 扫描完成后实例已停止（系统内存紧张被回收），数据目录保留，扫描结果已落盘 `docs/analysis/sonar/`
+- SonarQube：`D:\AI\Tools\sonarqube-26.11.0.134175`，数据目录 `D:\AI\Tools\sq-data-3`
+  （2026-11-24 重置，旧库 sq-data-2 保留），启动 `bin\windows-x86-64\StartSonar.bat`
+  （需 JAVA_HOME=JDK 21），端口 9000；扫描器在 `D:\AI\Tools\sonar-scanner-8.5.0.16571-windows-x64`；
+  一键重扫 `python tools/scan_sonar.py --base D:/AI/Temp/mipnote-base`（先
+  `git worktree add --detach D:/AI/Temp/mipnote-base 1098a1e` 检出原始基线）。
+  扫描结果落盘 `docs/analysis/sonar/`
 
 ## 五、关键决策
 
@@ -77,7 +80,12 @@
 ## 六、下一步
 
 1. M7–M9 已全部完成（深色模式/置顶/提醒重复）；12/10 功能冻结，之前可再评估是否补新功能。
-2. 报告收尾：两份报告通读定稿（新增 M7/M8/M9 后维护表、维护代码量、Sonar/Lint 数字需更新；第 5 章按实际使用补充；M9 的 TIME_SET 竞态可作为「使用中发现的问题 → 解决」素材）。
-3. PPT：演示录屏（25 秒连续操作）；组员功能定后回填第 8 页占位卡与第 10 页分工；M7–M9 后 Sonar/Lint 重扫、类图重渲染。
-4. 组员新功能提名：11/26 前收「功能名 + 做什么 + 怎么做」三行，汇总查重。
-5. 多个新提交未推送（M7 b789c50、M8 1c3df0e、M9 7487201 等 develop 已推送；PPT 更新待提交）。
+2. 报告收尾：第 3 章与 Sonar/Lint 数字已同步（2026-11-24 重扫）；剩通读定稿与第 5 章按实际使用补充（M9 的 TIME_SET 竞态可作「使用中发现的问题 → 解决」素材）。
+3. PPT：已换新类图与数字（本次收尾提交）；剩演示录屏（25 秒连续操作）、组员功能定后回填第 8 页占位卡与第 10 页分工。
+4. 组员新功能提名：11/26 前收「功能名 + 做什么 + 怎么做」三行，汇总查重；成员功能合并后重跑
+   `python tools/count_maintenance.py`、`python tools/scan_sonar.py --skip-base`、`sh gradlew lintDebug`，重渲染类图再回填 PPT。
+5. 推送状态（2026-11-24）：github.com 的 git 传输被网络重置，改走 GitHub API 通道推送成功
+   —— 远端 develop head = `10b0a060`（树与本地 `572779b` 一致；中间 `a96e97db` 是首次 API
+   推送的 CRLF 版本，已被后一个提交完全覆盖）。**本地与远端历史分叉（内容一致、SHA 不同），
+   网络恢复后执行 `git fetch origin && git reset --hard origin/develop` 对齐。**
+   兜底脚本：`tools/gh_api_push.py`（提交里的精确 blob，不读工作区）；本次收尾提交（UML/报告/PPT 同步）尚未推送。

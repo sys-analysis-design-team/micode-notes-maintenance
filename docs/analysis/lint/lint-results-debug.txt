@@ -7,10 +7,10 @@ D:\AI\Workspace\Projects\mipnote-oss\res\layout\note_edit.xml:88: Warning: This 
    to wrap_content rather than fill_parent or match_parent in the scrolling
    dimension.
 
-D:\AI\Workspace\Projects\mipnote-oss\src\net\micode\notes\ui\NoteEditActivity.java:455: Warning: Consider using apply() instead; commit writes its data to persistent storage immediately, whereas apply will handle it in the background [ApplySharedPref]
+D:\AI\Workspace\Projects\mipnote-oss\src\net\micode\notes\ui\NoteEditActivity.java:482: Warning: Consider using apply() instead; commit writes its data to persistent storage immediately, whereas apply will handle it in the background [ApplySharedPref]
             mSharedPrefs.edit().putInt(PREFERENCE_FONT_SIZE, mFontSizeId).commit();
                                                                           ~~~~~~~~
-D:\AI\Workspace\Projects\mipnote-oss\src\net\micode\notes\ui\NotesListActivity.java:224: Warning: Consider using apply() instead; commit writes its data to persistent storage immediately, whereas apply will handle it in the background [ApplySharedPref]
+D:\AI\Workspace\Projects\mipnote-oss\src\net\micode\notes\ui\NotesListActivity.java:232: Warning: Consider using apply() instead; commit writes its data to persistent storage immediately, whereas apply will handle it in the background [ApplySharedPref]
                 sp.edit().putBoolean(PREFERENCE_ADD_INTRODUCTION, true).commit();
                                                                         ~~~~~~~~
 
@@ -41,7 +41,7 @@ D:\AI\Workspace\Projects\mipnote-oss\src\net\micode\notes\gtask\remote\GTaskClie
 
    https://developer.android.com/reference/java/util/Locale.html#default_locale
 
-D:\AI\Workspace\Projects\mipnote-oss\src\net\micode\notes\ui\NoteEditActivity.java:616: Warning: Field requires API level 31 (current min is 23): android.provider.Settings#ACTION_REQUEST_SCHEDULE_EXACT_ALARM [InlinedApi]
+D:\AI\Workspace\Projects\mipnote-oss\src\net\micode\notes\ui\NoteEditActivity.java:677: Warning: Field requires API level 31 (current min is 23): android.provider.Settings#ACTION_REQUEST_SCHEDULE_EXACT_ALARM [InlinedApi]
                         Intent intent = new Intent(Settings.ACTION_REQUEST_SCHEDULE_EXACT_ALARM,
                                                    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -89,13 +89,13 @@ D:\AI\Workspace\Projects\mipnote-oss\build.gradle.kts:16: Warning: Not targeting
 
    https://developer.android.com/distribute/best-practices/develop/target-sdk.html
 
-D:\AI\Workspace\Projects\mipnote-oss\src\net\micode\notes\ui\NoteEditActivity.java:962: Warning: Avoid passing null as the view root (needed to resolve layout parameters on the inflated layout's root element) [InflateParams]
+D:\AI\Workspace\Projects\mipnote-oss\src\net\micode\notes\ui\NoteEditActivity.java:1023: Warning: Avoid passing null as the view root (needed to resolve layout parameters on the inflated layout's root element) [InflateParams]
         View view = LayoutInflater.from(this).inflate(R.layout.note_edit_list_item, null);
                                                                                     ~~~~
-D:\AI\Workspace\Projects\mipnote-oss\src\net\micode\notes\ui\NotesListActivity.java:243: Warning: Avoid passing null as the view root (needed to resolve layout parameters on the inflated layout's root element) [InflateParams]
+D:\AI\Workspace\Projects\mipnote-oss\src\net\micode\notes\ui\NotesListActivity.java:251: Warning: Avoid passing null as the view root (needed to resolve layout parameters on the inflated layout's root element) [InflateParams]
         mNotesListView.addFooterView(LayoutInflater.from(this).inflate(R.layout.note_list_footer, null),
                                                                                                   ~~~~
-D:\AI\Workspace\Projects\mipnote-oss\src\net\micode\notes\ui\NotesListActivity.java:282: Warning: Avoid passing null as the view root (needed to resolve layout parameters on the inflated layout's root element) [InflateParams]
+D:\AI\Workspace\Projects\mipnote-oss\src\net\micode\notes\ui\NotesListActivity.java:292: Warning: Avoid passing null as the view root (needed to resolve layout parameters on the inflated layout's root element) [InflateParams]
                     R.layout.note_list_dropdown_menu, null);
                                                       ~~~~
 
@@ -149,22 +149,28 @@ D:\AI\Workspace\Projects\mipnote-oss\build.gradle.kts:56: Warning: A newer versi
    MavenCentral dependency, and connects to the library every time, which
    makes it more flexible but also much slower.
 
-D:\AI\Workspace\Projects\mipnote-oss\res\values\strings.xml:98: Warning: Formatting %d followed by words ("selected"): This should probably be a plural rather than a string [PluralsCandidate]
+D:\AI\Workspace\Projects\mipnote-oss\res\values\strings.xml:105: Warning: Formatting %d followed by words ("note"): This should probably be a plural rather than a string [PluralsCandidate]
+    <string name="toast_notes_pinned">Pinned %d note(s)</string>
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+D:\AI\Workspace\Projects\mipnote-oss\res\values\strings.xml:106: Warning: Formatting %d followed by words ("note"): This should probably be a plural rather than a string [PluralsCandidate]
+    <string name="toast_notes_unpinned">Unpinned %d note(s)</string>
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+D:\AI\Workspace\Projects\mipnote-oss\res\values\strings.xml:108: Warning: Formatting %d followed by words ("selected"): This should probably be a plural rather than a string [PluralsCandidate]
     <string name="menu_select_title">%d selected</string>
     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-D:\AI\Workspace\Projects\mipnote-oss\res\values\strings.xml:122: Warning: Formatting %d followed by words ("notes"): This should probably be a plural rather than a string [PluralsCandidate]
+D:\AI\Workspace\Projects\mipnote-oss\res\values\strings.xml:132: Warning: Formatting %d followed by words ("notes"): This should probably be a plural rather than a string [PluralsCandidate]
     <string name="alert_message_delete_notes">Confirm to delete the selected %d notes?</string>
     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-D:\AI\Workspace\Projects\mipnote-oss\res\values\strings.xml:124: Warning: Formatting %d followed by words ("notes"): This should probably be a plural rather than a string [PluralsCandidate]
+D:\AI\Workspace\Projects\mipnote-oss\res\values\strings.xml:134: Warning: Formatting %d followed by words ("notes"): This should probably be a plural rather than a string [PluralsCandidate]
     <string name="format_move_notes_to_folder">Have moved selected %1$d notes to %2$s folder</string>
     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-D:\AI\Workspace\Projects\mipnote-oss\res\values\strings.xml:136: Warning: Formatting %d followed by words ("notes"): This should probably be a plural rather than a string [PluralsCandidate]
+D:\AI\Workspace\Projects\mipnote-oss\res\values\strings.xml:146: Warning: Formatting %d followed by words ("notes"): This should probably be a plural rather than a string [PluralsCandidate]
     <string name="backup_done">Saved %1$d notes and %2$d folders to the selected file.</string>
     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-D:\AI\Workspace\Projects\mipnote-oss\res\values\strings.xml:139: Warning: Formatting %d followed by words ("notes"): This should probably be a plural rather than a string [PluralsCandidate]
+D:\AI\Workspace\Projects\mipnote-oss\res\values\strings.xml:149: Warning: Formatting %d followed by words ("notes"): This should probably be a plural rather than a string [PluralsCandidate]
     <string name="restore_confirm">The file contains %1$d notes and %2$d folders. They will be added to the existing notes; current data is kept.</string>
     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-D:\AI\Workspace\Projects\mipnote-oss\res\values\strings.xml:140: Warning: Formatting %d followed by words ("notes"): This should probably be a plural rather than a string [PluralsCandidate]
+D:\AI\Workspace\Projects\mipnote-oss\res\values\strings.xml:150: Warning: Formatting %d followed by words ("notes"): This should probably be a plural rather than a string [PluralsCandidate]
     <string name="restore_done">Restored %1$d notes and %2$d folders.</string>
     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -201,7 +207,7 @@ D:\AI\Workspace\Projects\mipnote-oss\src\net\micode\notes\ui\AlarmInitReceiver.j
 
    https://goo.gle/UnsafeProtectedBroadcastReceiver
 
-D:\AI\Workspace\Projects\mipnote-oss\src\net\micode\notes\tool\ReminderScheduler.java:65: Warning: Unnecessary; SDK_INT is always >= 23 [ObsoleteSdkInt]
+D:\AI\Workspace\Projects\mipnote-oss\src\net\micode\notes\tool\ReminderScheduler.java:67: Warning: Unnecessary; SDK_INT is always >= 23 [ObsoleteSdkInt]
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
                 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -223,31 +229,31 @@ D:\AI\Workspace\Projects\mipnote-oss\src\net\micode\notes\gtask\remote\GTaskMana
 D:\AI\Workspace\Projects\mipnote-oss\src\net\micode\notes\gtask\remote\GTaskSyncService.java:66: Warning: Do not place Android context classes in static fields (static reference to GTaskASyncTask which has field mContext pointing to Context); this is a memory leak [StaticFieldLeak]
     private static GTaskASyncTask mSyncTask = null;
             ~~~~~~
-D:\AI\Workspace\Projects\mipnote-oss\src\net\micode\notes\ui\NoteEditActivity.java:690: Warning: This AsyncTask class should be static or leaks might occur (anonymous android.os.AsyncTask) [StaticFieldLeak]
+D:\AI\Workspace\Projects\mipnote-oss\src\net\micode\notes\ui\NoteEditActivity.java:751: Warning: This AsyncTask class should be static or leaks might occur (anonymous android.os.AsyncTask) [StaticFieldLeak]
         new AsyncTask<Void, Void, AiAnalysis>() {
         ^
-D:\AI\Workspace\Projects\mipnote-oss\src\net\micode\notes\ui\NotesListActivity.java:498: Warning: This AsyncTask class should be static or leaks might occur (anonymous android.os.AsyncTask) [StaticFieldLeak]
+D:\AI\Workspace\Projects\mipnote-oss\src\net\micode\notes\ui\NotesListActivity.java:533: Warning: This AsyncTask class should be static or leaks might occur (anonymous android.os.AsyncTask) [StaticFieldLeak]
         new AsyncTask<Void, Void, HashSet<AppWidgetAttribute>>() {
         ^
-D:\AI\Workspace\Projects\mipnote-oss\src\net\micode\notes\ui\NotesListActivity.java:844: Warning: This AsyncTask class should be static or leaks might occur (anonymous android.os.AsyncTask) [StaticFieldLeak]
+D:\AI\Workspace\Projects\mipnote-oss\src\net\micode\notes\ui\NotesListActivity.java:879: Warning: This AsyncTask class should be static or leaks might occur (anonymous android.os.AsyncTask) [StaticFieldLeak]
         new AsyncTask<Void, Void, String>() {
         ^
-D:\AI\Workspace\Projects\mipnote-oss\src\net\micode\notes\ui\NotesListActivity.java:870: Warning: This AsyncTask class should be static or leaks might occur (anonymous android.os.AsyncTask) [StaticFieldLeak]
+D:\AI\Workspace\Projects\mipnote-oss\src\net\micode\notes\ui\NotesListActivity.java:905: Warning: This AsyncTask class should be static or leaks might occur (anonymous android.os.AsyncTask) [StaticFieldLeak]
         new AsyncTask<Void, Void, Object>() {
         ^
-D:\AI\Workspace\Projects\mipnote-oss\src\net\micode\notes\ui\NotesListActivity.java:906: Warning: This AsyncTask class should be static or leaks might occur (anonymous android.os.AsyncTask) [StaticFieldLeak]
+D:\AI\Workspace\Projects\mipnote-oss\src\net\micode\notes\ui\NotesListActivity.java:941: Warning: This AsyncTask class should be static or leaks might occur (anonymous android.os.AsyncTask) [StaticFieldLeak]
         new AsyncTask<Void, Void, Object>() {
         ^
-D:\AI\Workspace\Projects\mipnote-oss\src\net\micode\notes\ui\NotesListActivity.java:955: Warning: This AsyncTask class should be static or leaks might occur (anonymous android.os.AsyncTask) [StaticFieldLeak]
+D:\AI\Workspace\Projects\mipnote-oss\src\net\micode\notes\ui\NotesListActivity.java:990: Warning: This AsyncTask class should be static or leaks might occur (anonymous android.os.AsyncTask) [StaticFieldLeak]
         new AsyncTask<Void, Void, Object>() {
         ^
-D:\AI\Workspace\Projects\mipnote-oss\src\net\micode\notes\ui\TrashActivity.java:113: Warning: This AsyncTask class should be static or leaks might occur (anonymous android.os.AsyncTask) [StaticFieldLeak]
+D:\AI\Workspace\Projects\mipnote-oss\src\net\micode\notes\ui\TrashActivity.java:114: Warning: This AsyncTask class should be static or leaks might occur (anonymous android.os.AsyncTask) [StaticFieldLeak]
         new AsyncTask<Void, Void, Cursor>() {
         ^
-D:\AI\Workspace\Projects\mipnote-oss\src\net\micode\notes\ui\TrashActivity.java:165: Warning: This AsyncTask class should be static or leaks might occur (anonymous android.os.AsyncTask) [StaticFieldLeak]
+D:\AI\Workspace\Projects\mipnote-oss\src\net\micode\notes\ui\TrashActivity.java:166: Warning: This AsyncTask class should be static or leaks might occur (anonymous android.os.AsyncTask) [StaticFieldLeak]
         new AsyncTask<Void, Void, Boolean>() {
         ^
-D:\AI\Workspace\Projects\mipnote-oss\src\net\micode\notes\ui\TrashActivity.java:223: Warning: This AsyncTask class should be static or leaks might occur (anonymous android.os.AsyncTask) [StaticFieldLeak]
+D:\AI\Workspace\Projects\mipnote-oss\src\net\micode\notes\ui\TrashActivity.java:224: Warning: This AsyncTask class should be static or leaks might occur (anonymous android.os.AsyncTask) [StaticFieldLeak]
         new AsyncTask<Void, Void, Boolean>() {
         ^
 
@@ -265,16 +271,16 @@ D:\AI\Workspace\Projects\mipnote-oss\src\net\micode\notes\ui\TrashActivity.java:
 
    ViewModel classes should never point to Views or non-application Contexts.
 
-D:\AI\Workspace\Projects\mipnote-oss\res\layout\note_edit.xml:255: Warning: This tag and its children can be replaced by one <TextView/> and a compound drawable [UseCompoundDrawables]
+D:\AI\Workspace\Projects\mipnote-oss\res\layout\note_edit.xml:256: Warning: This tag and its children can be replaced by one <TextView/> and a compound drawable [UseCompoundDrawables]
             <LinearLayout
              ~~~~~~~~~~~~
-D:\AI\Workspace\Projects\mipnote-oss\res\layout\note_edit.xml:293: Warning: This tag and its children can be replaced by one <TextView/> and a compound drawable [UseCompoundDrawables]
+D:\AI\Workspace\Projects\mipnote-oss\res\layout\note_edit.xml:294: Warning: This tag and its children can be replaced by one <TextView/> and a compound drawable [UseCompoundDrawables]
             <LinearLayout
              ~~~~~~~~~~~~
-D:\AI\Workspace\Projects\mipnote-oss\res\layout\note_edit.xml:331: Warning: This tag and its children can be replaced by one <TextView/> and a compound drawable [UseCompoundDrawables]
+D:\AI\Workspace\Projects\mipnote-oss\res\layout\note_edit.xml:332: Warning: This tag and its children can be replaced by one <TextView/> and a compound drawable [UseCompoundDrawables]
             <LinearLayout
              ~~~~~~~~~~~~
-D:\AI\Workspace\Projects\mipnote-oss\res\layout\note_edit.xml:369: Warning: This tag and its children can be replaced by one <TextView/> and a compound drawable [UseCompoundDrawables]
+D:\AI\Workspace\Projects\mipnote-oss\res\layout\note_edit.xml:370: Warning: This tag and its children can be replaced by one <TextView/> and a compound drawable [UseCompoundDrawables]
             <LinearLayout
              ~~~~~~~~~~~~
 
@@ -289,7 +295,7 @@ D:\AI\Workspace\Projects\mipnote-oss\res\layout\note_edit.xml:369: Warning: This
 
    There's a lint quickfix to perform this conversion in the Eclipse plugin.
 
-D:\AI\Workspace\Projects\mipnote-oss\src\net\micode\notes\ui\NotesListActivity.java:444: Warning: This Handler class should be static or leaks might occur (net.micode.notes.ui.NotesListActivity.BackgroundQueryHandler) [HandlerLeak]
+D:\AI\Workspace\Projects\mipnote-oss\src\net\micode\notes\ui\NotesListActivity.java:479: Warning: This Handler class should be static or leaks might occur (net.micode.notes.ui.NotesListActivity.BackgroundQueryHandler) [HandlerLeak]
     private final class BackgroundQueryHandler extends AsyncQueryHandler {
                         ~~~~~~~~~~~~~~~~~~~~~~
 
@@ -314,10 +320,10 @@ D:\AI\Workspace\Projects\mipnote-oss\src\net\micode\notes\gtask\remote\GTaskMana
    Integer.valueOf(42). This will typically use less memory because common
    integers such as 0 and 1 will share a single instance.
 
-D:\AI\Workspace\Projects\mipnote-oss\res\layout\note_edit.xml:127: Warning: Set android:baselineAligned="false" on this element for better performance [DisableBaselineAlignment]
+D:\AI\Workspace\Projects\mipnote-oss\res\layout\note_edit.xml:128: Warning: Set android:baselineAligned="false" on this element for better performance [DisableBaselineAlignment]
     <LinearLayout
      ~~~~~~~~~~~~
-D:\AI\Workspace\Projects\mipnote-oss\res\layout\note_edit.xml:241: Warning: Set android:baselineAligned="false" on this element for better performance [DisableBaselineAlignment]
+D:\AI\Workspace\Projects\mipnote-oss\res\layout\note_edit.xml:242: Warning: Set android:baselineAligned="false" on this element for better performance [DisableBaselineAlignment]
     <LinearLayout
      ~~~~~~~~~~~~
 
@@ -335,18 +341,18 @@ D:\AI\Workspace\Projects\mipnote-oss\res\layout\note_item.xml:40: Warning: Neste
    with non-zero weights is nested inside another LinearLayout with non-zero
    weights, then the number of measurements increase exponentially.
 
-D:\AI\Workspace\Projects\mipnote-oss\res\layout\ai_settings.xml:5: Warning: Possible overdraw: Root element paints background @android:color/white with a theme that also paints a background (inferred theme is @style/NoteTheme) [Overdraw]
-    android:background="@android:color/white" >
-    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+D:\AI\Workspace\Projects\mipnote-oss\res\layout\ai_settings.xml:5: Warning: Possible overdraw: Root element paints background ?android:attr/windowBackground with a theme that also paints a background (inferred theme is @style/NoteTheme) [Overdraw]
+    android:background="?android:attr/windowBackground" >
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 D:\AI\Workspace\Projects\mipnote-oss\res\layout\note_edit.xml:21: Warning: Possible overdraw: Root element paints background @drawable/list_background with a theme that also paints a background (inferred theme is @style/NoteTheme) [Overdraw]
     android:background="@drawable/list_background"
     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-D:\AI\Workspace\Projects\mipnote-oss\res\layout\note_list.xml:22: Warning: Possible overdraw: Root element paints background @drawable/list_background with a theme that also paints a background (inferred theme is @style/NoteTheme) [Overdraw]
-    android:background="@drawable/list_background">
-    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-D:\AI\Workspace\Projects\mipnote-oss\res\layout\trash_list.xml:6: Warning: Possible overdraw: Root element paints background @android:color/white with a theme that also paints a background (inferred theme is @android:style/Theme.Holo) [Overdraw]
-    android:background="@android:color/white">
-    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+D:\AI\Workspace\Projects\mipnote-oss\res\layout\note_list.xml:22: Warning: Possible overdraw: Root element paints background ?android:attr/windowBackground with a theme that also paints a background (inferred theme is @style/NoteTheme) [Overdraw]
+    android:background="?android:attr/windowBackground">
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+D:\AI\Workspace\Projects\mipnote-oss\res\layout\trash_list.xml:6: Warning: Possible overdraw: Root element paints background ?android:attr/windowBackground with a theme that also paints a background (inferred theme is @android:style/Theme.Holo) [Overdraw]
+    android:background="?android:attr/windowBackground">
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
    Explanation for issues of type "Overdraw":
    If you set a background drawable on a root view, then you should use a
@@ -375,7 +381,7 @@ D:\AI\Workspace\Projects\mipnote-oss\res\layout\account_dialog_title.xml:18: War
 D:\AI\Workspace\Projects\mipnote-oss\res\layout\add_account_text.xml:18: Warning: The resource R.layout.add_account_text appears to be unused [UnusedResources]
 <LinearLayout
 ^
-D:\AI\Workspace\Projects\mipnote-oss\res\values\arrays.xml:27: Warning: The resource R.array.menu_share_ways appears to be unused [UnusedResources]
+D:\AI\Workspace\Projects\mipnote-oss\res\values\arrays.xml:39: Warning: The resource R.array.menu_share_ways appears to be unused [UnusedResources]
     <string-array name="menu_share_ways">
                   ~~~~~~~~~~~~~~~~~~~~~~
 D:\AI\Workspace\Projects\mipnote-oss\res\drawable-hdpi\delete.png: Warning: The resource R.drawable.delete appears to be unused [UnusedResources]
@@ -388,79 +394,79 @@ D:\AI\Workspace\Projects\mipnote-oss\res\values\strings.xml:25: Warning: The res
 D:\AI\Workspace\Projects\mipnote-oss\res\values\strings.xml:30: Warning: The resource R.string.format_date_ymd appears to be unused [UnusedResources]
     <string name="format_date_ymd">yyyyMMdd</string>
             ~~~~~~~~~~~~~~~~~~~~~~
-D:\AI\Workspace\Projects\mipnote-oss\res\values\strings.xml:83: Warning: The resource R.string.file_path appears to be unused [UnusedResources]
+D:\AI\Workspace\Projects\mipnote-oss\res\values\strings.xml:89: Warning: The resource R.string.file_path appears to be unused [UnusedResources]
     <string name="file_path">/MIUI/notes/</string>
             ~~~~~~~~~~~~~~~~
-D:\AI\Workspace\Projects\mipnote-oss\res\values\strings.xml:84: Warning: The resource R.string.file_name_txt_format appears to be unused [UnusedResources]
+D:\AI\Workspace\Projects\mipnote-oss\res\values\strings.xml:90: Warning: The resource R.string.file_name_txt_format appears to be unused [UnusedResources]
     <string name="file_name_txt_format">notes_%s.txt</string>
             ~~~~~~~~~~~~~~~~~~~~~~~~~~~
-D:\AI\Workspace\Projects\mipnote-oss\res\values\strings.xml:92: Warning: The resource R.string.menu_sync appears to be unused [UnusedResources]
+D:\AI\Workspace\Projects\mipnote-oss\res\values\strings.xml:98: Warning: The resource R.string.menu_sync appears to be unused [UnusedResources]
     <string name="menu_sync">Sync</string>
             ~~~~~~~~~~~~~~~~
-D:\AI\Workspace\Projects\mipnote-oss\res\values\strings.xml:93: Warning: The resource R.string.menu_sync_cancel appears to be unused [UnusedResources]
+D:\AI\Workspace\Projects\mipnote-oss\res\values\strings.xml:99: Warning: The resource R.string.menu_sync_cancel appears to be unused [UnusedResources]
     <string name="menu_sync_cancel">Cancel syncing</string>
             ~~~~~~~~~~~~~~~~~~~~~~~
-D:\AI\Workspace\Projects\mipnote-oss\res\values\strings.xml:126: Warning: The resource R.string.error_sdcard_unmounted appears to be unused [UnusedResources]
+D:\AI\Workspace\Projects\mipnote-oss\res\values\strings.xml:136: Warning: The resource R.string.error_sdcard_unmounted appears to be unused [UnusedResources]
     <string name="error_sdcard_unmounted">SD card busy, not available now</string>
             ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-D:\AI\Workspace\Projects\mipnote-oss\res\values\strings.xml:133: Warning: The resource R.string.format_exported_file_location appears to be unused [UnusedResources]
+D:\AI\Workspace\Projects\mipnote-oss\res\values\strings.xml:143: Warning: The resource R.string.format_exported_file_location appears to be unused [UnusedResources]
     <string name="format_exported_file_location">Export text file (%1$s) to SD (%2$s) directory</string>
             ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-D:\AI\Workspace\Projects\mipnote-oss\res\values\strings.xml:173: Warning: The resource R.string.preferences_account_title appears to be unused [UnusedResources]
+D:\AI\Workspace\Projects\mipnote-oss\res\values\strings.xml:183: Warning: The resource R.string.preferences_account_title appears to be unused [UnusedResources]
     <string name="preferences_account_title">Sync account</string>
             ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-D:\AI\Workspace\Projects\mipnote-oss\res\values\strings.xml:174: Warning: The resource R.string.preferences_account_summary appears to be unused [UnusedResources]
+D:\AI\Workspace\Projects\mipnote-oss\res\values\strings.xml:184: Warning: The resource R.string.preferences_account_summary appears to be unused [UnusedResources]
     <string name="preferences_account_summary">Sync notes with google task</string>
             ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-D:\AI\Workspace\Projects\mipnote-oss\res\values\strings.xml:175: Warning: The resource R.string.preferences_last_sync_time appears to be unused [UnusedResources]
+D:\AI\Workspace\Projects\mipnote-oss\res\values\strings.xml:185: Warning: The resource R.string.preferences_last_sync_time appears to be unused [UnusedResources]
     <string name="preferences_last_sync_time">Last sync time %1$s</string>
             ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-D:\AI\Workspace\Projects\mipnote-oss\res\values\strings.xml:176: Warning: The resource R.string.preferences_last_sync_time_format appears to be unused [UnusedResources]
+D:\AI\Workspace\Projects\mipnote-oss\res\values\strings.xml:186: Warning: The resource R.string.preferences_last_sync_time_format appears to be unused [UnusedResources]
     <string name="preferences_last_sync_time_format">yyyy-MM-dd hh:mm:ss</string>
             ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-D:\AI\Workspace\Projects\mipnote-oss\res\values\strings.xml:177: Warning: The resource R.string.preferences_add_account appears to be unused [UnusedResources]
+D:\AI\Workspace\Projects\mipnote-oss\res\values\strings.xml:187: Warning: The resource R.string.preferences_add_account appears to be unused [UnusedResources]
     <string name="preferences_add_account">Add account</string>
             ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-D:\AI\Workspace\Projects\mipnote-oss\res\values\strings.xml:178: Warning: The resource R.string.preferences_menu_change_account appears to be unused [UnusedResources]
+D:\AI\Workspace\Projects\mipnote-oss\res\values\strings.xml:188: Warning: The resource R.string.preferences_menu_change_account appears to be unused [UnusedResources]
     <string name="preferences_menu_change_account">Change sync account</string>
             ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-D:\AI\Workspace\Projects\mipnote-oss\res\values\strings.xml:179: Warning: The resource R.string.preferences_menu_remove_account appears to be unused [UnusedResources]
+D:\AI\Workspace\Projects\mipnote-oss\res\values\strings.xml:189: Warning: The resource R.string.preferences_menu_remove_account appears to be unused [UnusedResources]
     <string name="preferences_menu_remove_account">Remove sync account</string>
             ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-D:\AI\Workspace\Projects\mipnote-oss\res\values\strings.xml:180: Warning: The resource R.string.preferences_menu_cancel appears to be unused [UnusedResources]
+D:\AI\Workspace\Projects\mipnote-oss\res\values\strings.xml:190: Warning: The resource R.string.preferences_menu_cancel appears to be unused [UnusedResources]
     <string name="preferences_menu_cancel">Cancel</string>
             ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-D:\AI\Workspace\Projects\mipnote-oss\res\values\strings.xml:181: Warning: The resource R.string.preferences_button_sync_immediately appears to be unused [UnusedResources]
+D:\AI\Workspace\Projects\mipnote-oss\res\values\strings.xml:191: Warning: The resource R.string.preferences_button_sync_immediately appears to be unused [UnusedResources]
     <string name="preferences_button_sync_immediately">Sync immediately</string>
             ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-D:\AI\Workspace\Projects\mipnote-oss\res\values\strings.xml:182: Warning: The resource R.string.preferences_button_sync_cancel appears to be unused [UnusedResources]
+D:\AI\Workspace\Projects\mipnote-oss\res\values\strings.xml:192: Warning: The resource R.string.preferences_button_sync_cancel appears to be unused [UnusedResources]
     <string name="preferences_button_sync_cancel">Cancel syncing</string>
             ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-D:\AI\Workspace\Projects\mipnote-oss\res\values\strings.xml:183: Warning: The resource R.string.preferences_dialog_change_account_title appears to be unused [UnusedResources]
+D:\AI\Workspace\Projects\mipnote-oss\res\values\strings.xml:193: Warning: The resource R.string.preferences_dialog_change_account_title appears to be unused [UnusedResources]
     <string name="preferences_dialog_change_account_title">Current account %1$s</string>
             ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-D:\AI\Workspace\Projects\mipnote-oss\res\values\strings.xml:184: Warning: The resource R.string.preferences_dialog_change_account_warn_msg appears to be unused [UnusedResources]
+D:\AI\Workspace\Projects\mipnote-oss\res\values\strings.xml:194: Warning: The resource R.string.preferences_dialog_change_account_warn_msg appears to be unused [UnusedResources]
     <string name="preferences_dialog_change_account_warn_msg">All sync related information will be deleted, which may result in duplicated items sometime</string>
             ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-D:\AI\Workspace\Projects\mipnote-oss\res\values\strings.xml:185: Warning: The resource R.string.preferences_dialog_select_account_title appears to be unused [UnusedResources]
+D:\AI\Workspace\Projects\mipnote-oss\res\values\strings.xml:195: Warning: The resource R.string.preferences_dialog_select_account_title appears to be unused [UnusedResources]
     <string name="preferences_dialog_select_account_title">Sync notes</string>
             ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-D:\AI\Workspace\Projects\mipnote-oss\res\values\strings.xml:186: Warning: The resource R.string.preferences_dialog_select_account_tips appears to be unused [UnusedResources]
+D:\AI\Workspace\Projects\mipnote-oss\res\values\strings.xml:196: Warning: The resource R.string.preferences_dialog_select_account_tips appears to be unused [UnusedResources]
     <string name="preferences_dialog_select_account_tips">Please select a google account. Local notes will be synced with google task.</string>
             ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-D:\AI\Workspace\Projects\mipnote-oss\res\values\strings.xml:187: Warning: The resource R.string.preferences_toast_cannot_change_account appears to be unused [UnusedResources]
+D:\AI\Workspace\Projects\mipnote-oss\res\values\strings.xml:197: Warning: The resource R.string.preferences_toast_cannot_change_account appears to be unused [UnusedResources]
     <string name="preferences_toast_cannot_change_account">Cannot change the account because sync is in progress</string>
             ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-D:\AI\Workspace\Projects\mipnote-oss\res\values\strings.xml:188: Warning: The resource R.string.preferences_toast_success_set_accout appears to be unused [UnusedResources]
+D:\AI\Workspace\Projects\mipnote-oss\res\values\strings.xml:198: Warning: The resource R.string.preferences_toast_success_set_accout appears to be unused [UnusedResources]
     <string name="preferences_toast_success_set_accout">%1$s has been set as the sync account</string>
             ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-D:\AI\Workspace\Projects\mipnote-oss\res\values\strings.xml:191: Warning: The resource R.string.button_delete appears to be unused [UnusedResources]
+D:\AI\Workspace\Projects\mipnote-oss\res\values\strings.xml:202: Warning: The resource R.string.button_delete appears to be unused [UnusedResources]
     <string name="button_delete">Delete</string>
             ~~~~~~~~~~~~~~~~~~~~
-D:\AI\Workspace\Projects\mipnote-oss\res\values\strings.xml:198: Warning: The resource R.string.search appears to be unused [UnusedResources]
+D:\AI\Workspace\Projects\mipnote-oss\res\values\strings.xml:209: Warning: The resource R.string.search appears to be unused [UnusedResources]
     <string name="search">Notes</string>
             ~~~~~~~~~~~~~
-D:\AI\Workspace\Projects\mipnote-oss\res\values\strings.xml:201: Warning: The resource R.plurals.search_results_title appears to be unused [UnusedResources]
+D:\AI\Workspace\Projects\mipnote-oss\res\values\strings.xml:212: Warning: The resource R.plurals.search_results_title appears to be unused [UnusedResources]
     <plurals name="search_results_title">
              ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 D:\AI\Workspace\Projects\mipnote-oss\res\values\styles.xml:51: Warning: The resource R.style.HighlightTextAppearancePrimary appears to be unused [UnusedResources]
@@ -512,40 +518,40 @@ D:\AI\Workspace\Projects\mipnote-oss\res\values-zh-rTW\strings.xml:25: Warning: 
 D:\AI\Workspace\Projects\mipnote-oss\res\values\strings.xml:25: Warning: Replace "..." with ellipsis character (…, &#8230;) ? [TypographyEllipsis]
     <string name="notelist_string_info">...</string>
                                         ~~~
-D:\AI\Workspace\Projects\mipnote-oss\res\values-zh-rTW\strings.xml:155: Warning: Replace "..." with ellipsis character (…, &#8230;) ? [TypographyEllipsis]
+D:\AI\Workspace\Projects\mipnote-oss\res\values-zh-rTW\strings.xml:165: Warning: Replace "..." with ellipsis character (…, &#8230;) ? [TypographyEllipsis]
     <string name="ticker_syncing">同步便簽...</string>
                                   ~~~~~~~
-D:\AI\Workspace\Projects\mipnote-oss\res\values-zh-rCN\strings.xml:156: Warning: Replace "..." with ellipsis character (…, &#8230;) ? [TypographyEllipsis]
+D:\AI\Workspace\Projects\mipnote-oss\res\values-zh-rCN\strings.xml:166: Warning: Replace "..." with ellipsis character (…, &#8230;) ? [TypographyEllipsis]
     <string name="ticker_syncing">同步便签...</string>
                                   ~~~~~~~
-D:\AI\Workspace\Projects\mipnote-oss\res\values\strings.xml:160: Warning: Replace "..." with ellipsis character (…, &#8230;) ? [TypographyEllipsis]
+D:\AI\Workspace\Projects\mipnote-oss\res\values\strings.xml:170: Warning: Replace "..." with ellipsis character (…, &#8230;) ? [TypographyEllipsis]
     <string name="ticker_syncing">Syncing notes...</string>
                                   ~~~~~~~~~~~~~~~~
-D:\AI\Workspace\Projects\mipnote-oss\res\values-zh-rTW\strings.xml:163: Warning: Replace "..." with ellipsis character (…, &#8230;) ? [TypographyEllipsis]
+D:\AI\Workspace\Projects\mipnote-oss\res\values-zh-rTW\strings.xml:173: Warning: Replace "..." with ellipsis character (…, &#8230;) ? [TypographyEllipsis]
     <string name="sync_progress_login">登陸%1$s...</string>
                                        ~~~~~~~~~
-D:\AI\Workspace\Projects\mipnote-oss\res\values-zh-rCN\strings.xml:164: Warning: Replace "..." with ellipsis character (…, &#8230;) ? [TypographyEllipsis]
+D:\AI\Workspace\Projects\mipnote-oss\res\values-zh-rCN\strings.xml:174: Warning: Replace "..." with ellipsis character (…, &#8230;) ? [TypographyEllipsis]
     <string name="sync_progress_login">登录%1$s...</string>
                                        ~~~~~~~~~
-D:\AI\Workspace\Projects\mipnote-oss\res\values-zh-rTW\strings.xml:164: Warning: Replace "..." with ellipsis character (…, &#8230;) ? [TypographyEllipsis]
+D:\AI\Workspace\Projects\mipnote-oss\res\values-zh-rTW\strings.xml:174: Warning: Replace "..." with ellipsis character (…, &#8230;) ? [TypographyEllipsis]
     <string name="sync_progress_init_list">正在獲取服務器便籤列表...</string>
                                            ~~~~~~~~~~~~~~
-D:\AI\Workspace\Projects\mipnote-oss\res\values-zh-rCN\strings.xml:165: Warning: Replace "..." with ellipsis character (…, &#8230;) ? [TypographyEllipsis]
+D:\AI\Workspace\Projects\mipnote-oss\res\values-zh-rCN\strings.xml:175: Warning: Replace "..." with ellipsis character (…, &#8230;) ? [TypographyEllipsis]
     <string name="sync_progress_init_list">正在获取服务器便签列表...</string>
                                            ~~~~~~~~~~~~~~
-D:\AI\Workspace\Projects\mipnote-oss\res\values-zh-rTW\strings.xml:165: Warning: Replace "..." with ellipsis character (…, &#8230;) ? [TypographyEllipsis]
+D:\AI\Workspace\Projects\mipnote-oss\res\values-zh-rTW\strings.xml:175: Warning: Replace "..." with ellipsis character (…, &#8230;) ? [TypographyEllipsis]
     <string name="sync_progress_syncing">正在同步本地便籤...</string>
                                          ~~~~~~~~~~~
-D:\AI\Workspace\Projects\mipnote-oss\res\values-zh-rCN\strings.xml:166: Warning: Replace "..." with ellipsis character (…, &#8230;) ? [TypographyEllipsis]
+D:\AI\Workspace\Projects\mipnote-oss\res\values-zh-rCN\strings.xml:176: Warning: Replace "..." with ellipsis character (…, &#8230;) ? [TypographyEllipsis]
     <string name="sync_progress_syncing">正在同步本地便签...</string>
                                          ~~~~~~~~~~~
-D:\AI\Workspace\Projects\mipnote-oss\res\values\strings.xml:168: Warning: Replace "..." with ellipsis character (…, &#8230;) ? [TypographyEllipsis]
+D:\AI\Workspace\Projects\mipnote-oss\res\values\strings.xml:178: Warning: Replace "..." with ellipsis character (…, &#8230;) ? [TypographyEllipsis]
     <string name="sync_progress_login">Logging into %1$s...</string>
                                        ~~~~~~~~~~~~~~~~~~~~
-D:\AI\Workspace\Projects\mipnote-oss\res\values\strings.xml:169: Warning: Replace "..." with ellipsis character (…, &#8230;) ? [TypographyEllipsis]
+D:\AI\Workspace\Projects\mipnote-oss\res\values\strings.xml:179: Warning: Replace "..." with ellipsis character (…, &#8230;) ? [TypographyEllipsis]
     <string name="sync_progress_init_list">Getting remote note list...</string>
                                            ~~~~~~~~~~~~~~~~~~~~~~~~~~~
-D:\AI\Workspace\Projects\mipnote-oss\res\values\strings.xml:170: Warning: Replace "..." with ellipsis character (…, &#8230;) ? [TypographyEllipsis]
+D:\AI\Workspace\Projects\mipnote-oss\res\values\strings.xml:180: Warning: Replace "..." with ellipsis character (…, &#8230;) ? [TypographyEllipsis]
     <string name="sync_progress_syncing">Synchronize local notes with Google Task...</string>
                                          ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -602,7 +608,7 @@ D:\AI\Workspace\Projects\mipnote-oss\res\layout\dialog_edit_text.xml:18: Warning
    If you really want to keep the text field generic, you can suppress this
    warning by setting inputType="text".
 
-D:\AI\Workspace\Projects\mipnote-oss\res\menu\note_list_options.xml:24: Warning: Prefer "ifRoom" instead of "always" [AlwaysShowAction]
+D:\AI\Workspace\Projects\mipnote-oss\res\menu\note_list_options.xml:25: Warning: Prefer "ifRoom" instead of "always" [AlwaysShowAction]
         android:showAsAction="always|withText" />
         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -654,7 +660,7 @@ D:\AI\Workspace\Projects\mipnote-oss\res\layout\dialog_edit_text.xml:18: Warning
 
    https://developer.android.com/guide/topics/text/autofill.html
 
-D:\AI\Workspace\Projects\mipnote-oss\res\values\strings.xml:200: Warning: The standard Android way to capitalize cancel is "Cancel" (tip: use @android:string/cancel instead) [ButtonCase]
+D:\AI\Workspace\Projects\mipnote-oss\res\values\strings.xml:211: Warning: The standard Android way to capitalize cancel is "Cancel" (tip: use @android:string/cancel instead) [ButtonCase]
     <string name="datetime_dialog_cancel">cancel</string>
                                           ~~~~~~
 
@@ -679,10 +685,10 @@ D:\AI\Workspace\Projects\mipnote-oss\build.gradle.kts:56: Warning: Use version c
 D:\AI\Workspace\Projects\mipnote-oss\src\net\micode\notes\ui\NoteEditText.java:170: Warning: Custom view NoteEditText overrides onTouchEvent but not performClick [ClickableViewAccessibility]
     public boolean onTouchEvent(MotionEvent event) {
                    ~~~~~~~~~~~~
-D:\AI\Workspace\Projects\mipnote-oss\src\net\micode\notes\ui\NotesListActivity.java:251: Warning: Custom view `Button` has setOnTouchListener called on it but does not override performClick [ClickableViewAccessibility]
+D:\AI\Workspace\Projects\mipnote-oss\src\net\micode\notes\ui\NotesListActivity.java:259: Warning: Custom view `Button` has setOnTouchListener called on it but does not override performClick [ClickableViewAccessibility]
         mAddNewNote.setOnTouchListener(new NewNoteOnTouchListener());
         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-D:\AI\Workspace\Projects\mipnote-oss\src\net\micode\notes\ui\NotesListActivity.java:375: Warning: NewNoteOnTouchListener#onTouch should call View#performClick when a click is detected [ClickableViewAccessibility]
+D:\AI\Workspace\Projects\mipnote-oss\src\net\micode\notes\ui\NotesListActivity.java:409: Warning: NewNoteOnTouchListener#onTouch should call View#performClick when a click is detected [ClickableViewAccessibility]
         public boolean onTouch(View v, MotionEvent event) {
                        ~~~~~~~
 
@@ -702,67 +708,70 @@ D:\AI\Workspace\Projects\mipnote-oss\res\layout\note_edit.xml:59: Warning: Missi
 D:\AI\Workspace\Projects\mipnote-oss\res\layout\note_edit.xml:72: Warning: Missing contentDescription attribute on image [ContentDescription]
             <ImageView
              ~~~~~~~~~
-D:\AI\Workspace\Projects\mipnote-oss\res\layout\note_edit.xml:113: Warning: Missing contentDescription attribute on image [ContentDescription]
+D:\AI\Workspace\Projects\mipnote-oss\res\layout\note_edit.xml:114: Warning: Missing contentDescription attribute on image [ContentDescription]
             <ImageView
              ~~~~~~~~~
-D:\AI\Workspace\Projects\mipnote-oss\res\layout\note_edit.xml:120: Warning: Missing contentDescription attribute on image [ContentDescription]
+D:\AI\Workspace\Projects\mipnote-oss\res\layout\note_edit.xml:121: Warning: Missing contentDescription attribute on image [ContentDescription]
     <ImageView
      ~~~~~~~~~
-D:\AI\Workspace\Projects\mipnote-oss\res\layout\note_edit.xml:142: Warning: Missing contentDescription attribute on image [ContentDescription]
+D:\AI\Workspace\Projects\mipnote-oss\res\layout\note_edit.xml:143: Warning: Missing contentDescription attribute on image [ContentDescription]
             <ImageView
              ~~~~~~~~~
-D:\AI\Workspace\Projects\mipnote-oss\res\layout\note_edit.xml:147: Warning: Missing contentDescription attribute on image [ContentDescription]
+D:\AI\Workspace\Projects\mipnote-oss\res\layout\note_edit.xml:148: Warning: Missing contentDescription attribute on image [ContentDescription]
             <ImageView
              ~~~~~~~~~
-D:\AI\Workspace\Projects\mipnote-oss\res\layout\note_edit.xml:163: Warning: Missing contentDescription attribute on image [ContentDescription]
+D:\AI\Workspace\Projects\mipnote-oss\res\layout\note_edit.xml:164: Warning: Missing contentDescription attribute on image [ContentDescription]
             <ImageView
              ~~~~~~~~~
-D:\AI\Workspace\Projects\mipnote-oss\res\layout\note_edit.xml:168: Warning: Missing contentDescription attribute on image [ContentDescription]
+D:\AI\Workspace\Projects\mipnote-oss\res\layout\note_edit.xml:169: Warning: Missing contentDescription attribute on image [ContentDescription]
             <ImageView
              ~~~~~~~~~
-D:\AI\Workspace\Projects\mipnote-oss\res\layout\note_edit.xml:184: Warning: Missing contentDescription attribute on image [ContentDescription]
+D:\AI\Workspace\Projects\mipnote-oss\res\layout\note_edit.xml:185: Warning: Missing contentDescription attribute on image [ContentDescription]
             <ImageView
              ~~~~~~~~~
-D:\AI\Workspace\Projects\mipnote-oss\res\layout\note_edit.xml:189: Warning: Missing contentDescription attribute on image [ContentDescription]
+D:\AI\Workspace\Projects\mipnote-oss\res\layout\note_edit.xml:190: Warning: Missing contentDescription attribute on image [ContentDescription]
             <ImageView
              ~~~~~~~~~
-D:\AI\Workspace\Projects\mipnote-oss\res\layout\note_edit.xml:205: Warning: Missing contentDescription attribute on image [ContentDescription]
+D:\AI\Workspace\Projects\mipnote-oss\res\layout\note_edit.xml:206: Warning: Missing contentDescription attribute on image [ContentDescription]
             <ImageView
              ~~~~~~~~~
-D:\AI\Workspace\Projects\mipnote-oss\res\layout\note_edit.xml:210: Warning: Missing contentDescription attribute on image [ContentDescription]
+D:\AI\Workspace\Projects\mipnote-oss\res\layout\note_edit.xml:211: Warning: Missing contentDescription attribute on image [ContentDescription]
             <ImageView
              ~~~~~~~~~
-D:\AI\Workspace\Projects\mipnote-oss\res\layout\note_edit.xml:225: Warning: Missing contentDescription attribute on image [ContentDescription]
+D:\AI\Workspace\Projects\mipnote-oss\res\layout\note_edit.xml:226: Warning: Missing contentDescription attribute on image [ContentDescription]
             <ImageView
              ~~~~~~~~~
-D:\AI\Workspace\Projects\mipnote-oss\res\layout\note_edit.xml:230: Warning: Missing contentDescription attribute on image [ContentDescription]
+D:\AI\Workspace\Projects\mipnote-oss\res\layout\note_edit.xml:231: Warning: Missing contentDescription attribute on image [ContentDescription]
             <ImageView
              ~~~~~~~~~
-D:\AI\Workspace\Projects\mipnote-oss\res\layout\note_edit.xml:262: Warning: Missing contentDescription attribute on image [ContentDescription]
+D:\AI\Workspace\Projects\mipnote-oss\res\layout\note_edit.xml:263: Warning: Missing contentDescription attribute on image [ContentDescription]
                 <ImageView
                  ~~~~~~~~~
-D:\AI\Workspace\Projects\mipnote-oss\res\layout\note_edit.xml:275: Warning: Missing contentDescription attribute on image [ContentDescription]
+D:\AI\Workspace\Projects\mipnote-oss\res\layout\note_edit.xml:276: Warning: Missing contentDescription attribute on image [ContentDescription]
             <ImageView
              ~~~~~~~~~
-D:\AI\Workspace\Projects\mipnote-oss\res\layout\note_edit.xml:300: Warning: Missing contentDescription attribute on image [ContentDescription]
+D:\AI\Workspace\Projects\mipnote-oss\res\layout\note_edit.xml:301: Warning: Missing contentDescription attribute on image [ContentDescription]
                 <ImageView
                  ~~~~~~~~~
-D:\AI\Workspace\Projects\mipnote-oss\res\layout\note_edit.xml:313: Warning: Missing contentDescription attribute on image [ContentDescription]
+D:\AI\Workspace\Projects\mipnote-oss\res\layout\note_edit.xml:314: Warning: Missing contentDescription attribute on image [ContentDescription]
             <ImageView
              ~~~~~~~~~
-D:\AI\Workspace\Projects\mipnote-oss\res\layout\note_edit.xml:338: Warning: Missing contentDescription attribute on image [ContentDescription]
+D:\AI\Workspace\Projects\mipnote-oss\res\layout\note_edit.xml:339: Warning: Missing contentDescription attribute on image [ContentDescription]
                 <ImageView
                  ~~~~~~~~~
-D:\AI\Workspace\Projects\mipnote-oss\res\layout\note_edit.xml:351: Warning: Missing contentDescription attribute on image [ContentDescription]
+D:\AI\Workspace\Projects\mipnote-oss\res\layout\note_edit.xml:352: Warning: Missing contentDescription attribute on image [ContentDescription]
             <ImageView
              ~~~~~~~~~
-D:\AI\Workspace\Projects\mipnote-oss\res\layout\note_edit.xml:376: Warning: Missing contentDescription attribute on image [ContentDescription]
+D:\AI\Workspace\Projects\mipnote-oss\res\layout\note_edit.xml:377: Warning: Missing contentDescription attribute on image [ContentDescription]
                 <ImageView
                  ~~~~~~~~~
-D:\AI\Workspace\Projects\mipnote-oss\res\layout\note_edit.xml:389: Warning: Missing contentDescription attribute on image [ContentDescription]
+D:\AI\Workspace\Projects\mipnote-oss\res\layout\note_edit.xml:390: Warning: Missing contentDescription attribute on image [ContentDescription]
             <ImageView
              ~~~~~~~~~
-D:\AI\Workspace\Projects\mipnote-oss\res\layout\note_item.xml:73: Warning: Missing contentDescription attribute on image [ContentDescription]
+D:\AI\Workspace\Projects\mipnote-oss\res\layout\note_item.xml:50: Warning: Missing contentDescription attribute on image [ContentDescription]
+                <ImageView
+                 ~~~~~~~~~
+D:\AI\Workspace\Projects\mipnote-oss\res\layout\note_item.xml:83: Warning: Missing contentDescription attribute on image [ContentDescription]
     <ImageView
      ~~~~~~~~~
 D:\AI\Workspace\Projects\mipnote-oss\res\layout\widget_2x.xml:22: Warning: Missing contentDescription attribute on image [ContentDescription]
@@ -812,10 +821,10 @@ D:\AI\Workspace\Projects\mipnote-oss\res\layout\ai_settings.xml:47: Warning: Mis
    If your view is labeled but by a label in a different layout which includes
    this one, just suppress this warning from lint.
 
-D:\AI\Workspace\Projects\mipnote-oss\src\net\micode\notes\ui\NotesListItem.java:96: Warning: Do not concatenate text displayed with setText. Use resource string with placeholders. [SetTextI18n]
+D:\AI\Workspace\Projects\mipnote-oss\src\net\micode\notes\ui\NotesListItem.java:101: Warning: Do not concatenate text displayed with setText. Use resource string with placeholders. [SetTextI18n]
             mTitle.setText(context.getString(R.string.call_record_folder_name)
                            ^
-D:\AI\Workspace\Projects\mipnote-oss\src\net\micode\notes\ui\NotesListItem.java:118: Warning: Do not concatenate text displayed with setText. Use resource string with placeholders. [SetTextI18n]
+D:\AI\Workspace\Projects\mipnote-oss\src\net\micode\notes\ui\NotesListItem.java:123: Warning: Do not concatenate text displayed with setText. Use resource string with placeholders. [SetTextI18n]
                 mTitle.setText(data.getSnippet()
                                ^
 
@@ -859,70 +868,73 @@ D:\AI\Workspace\Projects\mipnote-oss\res\layout\note_edit.xml:83: Warning: Use "
 D:\AI\Workspace\Projects\mipnote-oss\res\layout\note_edit.xml:95: Warning: Use "start" instead of "left" to ensure correct behavior in right-to-left locales [RtlHardcoded]
                         android:gravity="left|top"
                                          ~~~~~~~~
-D:\AI\Workspace\Projects\mipnote-oss\res\layout\note_edit.xml:108: Warning: Consider replacing android:layout_marginLeft with android:layout_marginStart="-10dip" to better support right-to-left layouts [RtlHardcoded]
+D:\AI\Workspace\Projects\mipnote-oss\res\layout\note_edit.xml:109: Warning: Consider replacing android:layout_marginLeft with android:layout_marginStart="-10dip" to better support right-to-left layouts [RtlHardcoded]
                         android:layout_marginLeft="-10dip"
                         ~~~~~~~~~~~~~~~~~~~~~~~~~
-D:\AI\Workspace\Projects\mipnote-oss\res\layout\note_edit.xml:125: Warning: Use "end" instead of "right" to ensure correct behavior in right-to-left locales [RtlHardcoded]
+D:\AI\Workspace\Projects\mipnote-oss\res\layout\note_edit.xml:126: Warning: Use "end" instead of "right" to ensure correct behavior in right-to-left locales [RtlHardcoded]
         android:layout_gravity="top|right" />
                                 ~~~~~~~~~
-D:\AI\Workspace\Projects\mipnote-oss\res\layout\note_edit.xml:133: Warning: Consider replacing android:layout_marginRight with android:layout_marginEnd="8dip" to better support right-to-left layouts [RtlHardcoded]
+D:\AI\Workspace\Projects\mipnote-oss\res\layout\note_edit.xml:134: Warning: Consider replacing android:layout_marginRight with android:layout_marginEnd="8dip" to better support right-to-left layouts [RtlHardcoded]
         android:layout_marginRight="8dip"
         ~~~~~~~~~~~~~~~~~~~~~~~~~~
-D:\AI\Workspace\Projects\mipnote-oss\res\layout\note_edit.xml:134: Warning: Use "end" instead of "right" to ensure correct behavior in right-to-left locales [RtlHardcoded]
+D:\AI\Workspace\Projects\mipnote-oss\res\layout\note_edit.xml:135: Warning: Use "end" instead of "right" to ensure correct behavior in right-to-left locales [RtlHardcoded]
         android:layout_gravity="top|right"
                                 ~~~~~~~~~
-D:\AI\Workspace\Projects\mipnote-oss\res\layout\note_edit.xml:151: Warning: Use "end" instead of "right" to ensure correct behavior in right-to-left locales [RtlHardcoded]
+D:\AI\Workspace\Projects\mipnote-oss\res\layout\note_edit.xml:152: Warning: Use "end" instead of "right" to ensure correct behavior in right-to-left locales [RtlHardcoded]
                 android:layout_gravity="bottom|right"
                                         ~~~~~~~~~~~~
-D:\AI\Workspace\Projects\mipnote-oss\res\layout\note_edit.xml:152: Warning: Consider replacing android:layout_marginRight with android:layout_marginEnd="5dip" to better support right-to-left layouts [RtlHardcoded]
+D:\AI\Workspace\Projects\mipnote-oss\res\layout\note_edit.xml:153: Warning: Consider replacing android:layout_marginRight with android:layout_marginEnd="5dip" to better support right-to-left layouts [RtlHardcoded]
                 android:layout_marginRight="5dip"
                 ~~~~~~~~~~~~~~~~~~~~~~~~~~
-D:\AI\Workspace\Projects\mipnote-oss\res\layout\note_edit.xml:172: Warning: Use "end" instead of "right" to ensure correct behavior in right-to-left locales [RtlHardcoded]
+D:\AI\Workspace\Projects\mipnote-oss\res\layout\note_edit.xml:173: Warning: Use "end" instead of "right" to ensure correct behavior in right-to-left locales [RtlHardcoded]
                 android:layout_gravity="bottom|right"
                                         ~~~~~~~~~~~~
-D:\AI\Workspace\Projects\mipnote-oss\res\layout\note_edit.xml:175: Warning: Consider replacing android:layout_marginRight with android:layout_marginEnd="3dip" to better support right-to-left layouts [RtlHardcoded]
+D:\AI\Workspace\Projects\mipnote-oss\res\layout\note_edit.xml:176: Warning: Consider replacing android:layout_marginRight with android:layout_marginEnd="3dip" to better support right-to-left layouts [RtlHardcoded]
                 android:layout_marginRight="3dip"
                 ~~~~~~~~~~~~~~~~~~~~~~~~~~
-D:\AI\Workspace\Projects\mipnote-oss\res\layout\note_edit.xml:193: Warning: Use "end" instead of "right" to ensure correct behavior in right-to-left locales [RtlHardcoded]
+D:\AI\Workspace\Projects\mipnote-oss\res\layout\note_edit.xml:194: Warning: Use "end" instead of "right" to ensure correct behavior in right-to-left locales [RtlHardcoded]
                 android:layout_gravity="bottom|right"
                                         ~~~~~~~~~~~~
-D:\AI\Workspace\Projects\mipnote-oss\res\layout\note_edit.xml:196: Warning: Consider replacing android:layout_marginRight with android:layout_marginEnd="2dip" to better support right-to-left layouts [RtlHardcoded]
+D:\AI\Workspace\Projects\mipnote-oss\res\layout\note_edit.xml:197: Warning: Consider replacing android:layout_marginRight with android:layout_marginEnd="2dip" to better support right-to-left layouts [RtlHardcoded]
                 android:layout_marginRight="2dip"
                 ~~~~~~~~~~~~~~~~~~~~~~~~~~
-D:\AI\Workspace\Projects\mipnote-oss\res\layout\note_edit.xml:214: Warning: Use "end" instead of "right" to ensure correct behavior in right-to-left locales [RtlHardcoded]
+D:\AI\Workspace\Projects\mipnote-oss\res\layout\note_edit.xml:215: Warning: Use "end" instead of "right" to ensure correct behavior in right-to-left locales [RtlHardcoded]
                 android:layout_gravity="bottom|right"
                                         ~~~~~~~~~~~~
-D:\AI\Workspace\Projects\mipnote-oss\res\layout\note_edit.xml:234: Warning: Use "end" instead of "right" to ensure correct behavior in right-to-left locales [RtlHardcoded]
+D:\AI\Workspace\Projects\mipnote-oss\res\layout\note_edit.xml:235: Warning: Use "end" instead of "right" to ensure correct behavior in right-to-left locales [RtlHardcoded]
                 android:layout_gravity="bottom|right"
                                         ~~~~~~~~~~~~
-D:\AI\Workspace\Projects\mipnote-oss\res\layout\note_edit.xml:279: Warning: Use "end" instead of "right" to ensure correct behavior in right-to-left locales [RtlHardcoded]
+D:\AI\Workspace\Projects\mipnote-oss\res\layout\note_edit.xml:280: Warning: Use "end" instead of "right" to ensure correct behavior in right-to-left locales [RtlHardcoded]
                 android:layout_gravity="bottom|right"
                                         ~~~~~~~~~~~~
-D:\AI\Workspace\Projects\mipnote-oss\res\layout\note_edit.xml:280: Warning: Consider replacing android:layout_marginRight with android:layout_marginEnd="6dip" to better support right-to-left layouts [RtlHardcoded]
+D:\AI\Workspace\Projects\mipnote-oss\res\layout\note_edit.xml:281: Warning: Consider replacing android:layout_marginRight with android:layout_marginEnd="6dip" to better support right-to-left layouts [RtlHardcoded]
                 android:layout_marginRight="6dip"
                 ~~~~~~~~~~~~~~~~~~~~~~~~~~
-D:\AI\Workspace\Projects\mipnote-oss\res\layout\note_edit.xml:317: Warning: Use "end" instead of "right" to ensure correct behavior in right-to-left locales [RtlHardcoded]
+D:\AI\Workspace\Projects\mipnote-oss\res\layout\note_edit.xml:318: Warning: Use "end" instead of "right" to ensure correct behavior in right-to-left locales [RtlHardcoded]
                 android:layout_gravity="bottom|right"
                                         ~~~~~~~~~~~~
-D:\AI\Workspace\Projects\mipnote-oss\res\layout\note_edit.xml:320: Warning: Consider replacing android:layout_marginRight with android:layout_marginEnd="6dip" to better support right-to-left layouts [RtlHardcoded]
+D:\AI\Workspace\Projects\mipnote-oss\res\layout\note_edit.xml:321: Warning: Consider replacing android:layout_marginRight with android:layout_marginEnd="6dip" to better support right-to-left layouts [RtlHardcoded]
                 android:layout_marginRight="6dip"
                 ~~~~~~~~~~~~~~~~~~~~~~~~~~
-D:\AI\Workspace\Projects\mipnote-oss\res\layout\note_edit.xml:355: Warning: Use "end" instead of "right" to ensure correct behavior in right-to-left locales [RtlHardcoded]
+D:\AI\Workspace\Projects\mipnote-oss\res\layout\note_edit.xml:356: Warning: Use "end" instead of "right" to ensure correct behavior in right-to-left locales [RtlHardcoded]
                 android:layout_gravity="bottom|right"
                                         ~~~~~~~~~~~~
-D:\AI\Workspace\Projects\mipnote-oss\res\layout\note_edit.xml:358: Warning: Consider replacing android:layout_marginRight with android:layout_marginEnd="6dip" to better support right-to-left layouts [RtlHardcoded]
+D:\AI\Workspace\Projects\mipnote-oss\res\layout\note_edit.xml:359: Warning: Consider replacing android:layout_marginRight with android:layout_marginEnd="6dip" to better support right-to-left layouts [RtlHardcoded]
                 android:layout_marginRight="6dip"
                 ~~~~~~~~~~~~~~~~~~~~~~~~~~
-D:\AI\Workspace\Projects\mipnote-oss\res\layout\note_edit.xml:393: Warning: Use "end" instead of "right" to ensure correct behavior in right-to-left locales [RtlHardcoded]
+D:\AI\Workspace\Projects\mipnote-oss\res\layout\note_edit.xml:394: Warning: Use "end" instead of "right" to ensure correct behavior in right-to-left locales [RtlHardcoded]
                 android:layout_gravity="bottom|right"
                                         ~~~~~~~~~~~~
-D:\AI\Workspace\Projects\mipnote-oss\res\layout\note_edit.xml:396: Warning: Consider replacing android:layout_marginRight with android:layout_marginEnd="6dip" to better support right-to-left layouts [RtlHardcoded]
+D:\AI\Workspace\Projects\mipnote-oss\res\layout\note_edit.xml:397: Warning: Consider replacing android:layout_marginRight with android:layout_marginEnd="6dip" to better support right-to-left layouts [RtlHardcoded]
                 android:layout_marginRight="6dip"
                 ~~~~~~~~~~~~~~~~~~~~~~~~~~
 D:\AI\Workspace\Projects\mipnote-oss\res\layout\note_edit_list_item.xml:29: Warning: Use "start" instead of "left" to ensure correct behavior in right-to-left locales [RtlHardcoded]
         android:layout_gravity="top|left" />
                                 ~~~~~~~~
-D:\AI\Workspace\Projects\mipnote-oss\res\layout\note_item.xml:77: Warning: Use "end" instead of "right" to ensure correct behavior in right-to-left locales [RtlHardcoded]
+D:\AI\Workspace\Projects\mipnote-oss\res\layout\note_item.xml:55: Warning: Consider replacing android:layout_marginRight with android:layout_marginEnd="4dip" to better support right-to-left layouts [RtlHardcoded]
+                    android:layout_marginRight="4dip"
+                    ~~~~~~~~~~~~~~~~~~~~~~~~~~
+D:\AI\Workspace\Projects\mipnote-oss\res\layout\note_item.xml:87: Warning: Use "end" instead of "right" to ensure correct behavior in right-to-left locales [RtlHardcoded]
         android:layout_gravity="top|right"/>
                                 ~~~~~~~~~
 D:\AI\Workspace\Projects\mipnote-oss\res\layout\note_list_dropdown_menu.xml:28: Warning: Use "start" instead of "left" to ensure correct behavior in right-to-left locales [RtlHardcoded]
@@ -948,4 +960,4 @@ D:\AI\Workspace\Projects\mipnote-oss\res\layout\note_list_dropdown_menu.xml:28: 
    the left bitmask. Therefore, you can use gravity="start" rather than
    gravity="left|start".)
 
-0 errors, 174 warnings
+0 errors, 178 warnings

@@ -112,7 +112,7 @@ UI（列表/编辑）
 
 ### 3.1 维护的内容
 
-共完成 6 项必做维护 + 1 项选做（待定），覆盖缺陷修复与功能新增：
+共完成 9 项维护：6 项必做维护 + 3 项自选新功能（M7–M9），覆盖缺陷修复与功能新增：
 
 | 序号 | 维护类别 | 名称 | 描述 |
 |---|---|---|---|
@@ -122,24 +122,31 @@ UI（列表/编辑）
 | M4 | 修改缺陷 | 提醒与通知重构 | 精确闹钟权限适配；通知渠道与动作；开机重建提醒 |
 | M5 | 新增功能 | 回收站 | 软删除、恢复、彻底删除、清空回收站 |
 | M6 | 新增功能 | AI 摘要与待办提取 | OpenAI 兼容接口 + 离线规则兜底；确认后写入；Key 不入库 |
+| M7 | 新增功能 | 深色模式 | 跟随系统/浅色/深色三态切换；设置页即时生效；便签纸保持浅色 |
+| M8 | 新增功能 | 便签置顶 | 列表多选批量置顶/取消；置顶排序靠前；状态只存本机，不进备份 |
+| M9 | 新增功能 | 提醒重复 | 每天/每周/工作日三档；到点提醒后自动推进下一次；删除提醒时清空规则 |
 
-维护代码量：6 项共 2,836 行新增、1,045 行删除，受影响 3,881 行、25 个文件
+维护代码量：9 项共 3,451 行新增、1,068 行删除，受影响 4,519 行、33 个文件
 （`docs/analysis/maintenance_stats.md`）。
 
 ### 3.2 开源软件维护所产生的设计
 
 维护不改变原始分层，在原有包内扩展：
 
-- `data`：新增 `ProviderSql`（纯 Java，可单测的 SQL 构造器）；修改 `NotesProvider`。
+- `data`：新增 `ProviderSql`（纯 Java，可单测的 SQL 构造器）；修改 `NotesProvider`；
+  `NotesDatabaseHelper` 升级链延伸到 v6（v5 加 `pinned`、v6 加 `repeat_rule`）。
 - `tool`：新增 `BackupNote`、`NoteBackupCodec`（备份编解码）、`ReminderScheduler`、
-  `ReminderNotifier`（提醒调度与通知）、`AiAnalysis`/`AiClient`/`AiResultParser`/
-  `AiSettings`/`LocalNoteAnalyzer`（AI 分析链路），重写 `BackupUtils`。
-- `ui`：新增 `TrashActivity`（回收站）、`AiSettingsActivity`（AI 配置）；
-  重构 `NoteEditActivity` 的提醒与 AI 入口；列表页新增备份/恢复/回收站菜单。
+  `ReminderNotifier`（提醒调度与通知）、`ReminderRepeats`（重复规则计算，纯 Java）、
+  `AiAnalysis`/`AiClient`/`AiResultParser`/`AiSettings`/`LocalNoteAnalyzer`（AI 分析链路），
+  重写 `BackupUtils`。
+- `ui`：新增 `TrashActivity`（回收站）、`AiSettingsActivity`（AI 配置）、
+  `ThemeHelper`（三态主题的应用与切换）；重构 `NoteEditActivity` 的提醒与 AI 入口；
+  列表页新增备份/恢复/回收站/置顶菜单，设置页新增深色模式选项。
 - `widget`：`NoteWidgetProvider` 适配新版 PendingIntent 与导出。
 - 退役：删除 `AlarmAlertActivity`（全屏提醒页），`GTaskSyncService` 等保留源码但不接入 UI。
 
-维护后包图与设计类图待绘制（区分新增/修改类）。
+维护后包图、用例图与设计类图已绘制，新增类用绿色、重构类用橙色区分
+（`docs/uml/`）。
 
 ### 3.3 维护代码数量及其质量情况
 
@@ -151,22 +158,26 @@ UI（列表/编辑）
 | M5 回收站 | 477 | 22 | 499 | 4 |
 | M4 提醒与通知 | 486 | 219 | 705 | 7 |
 | M6 AI 摘要与待办 | 806 | 0 | 806 | 9 |
-| 合计 | 2,836 | 1,045 | 3,881 | 25 |
+| M7 深色模式 | 160 | 0 | 160 | 6 |
+| M8 便签置顶 | 145 | 5 | 150 | 7 |
+| M9 提醒重复 | 310 | 18 | 328 | 7 |
+| 合计 | 3,451 | 1,068 | 4,519 | 33 |
 
-新增 13 个类、1,109 行代码，类内注释 300 行（注释率 27%）。
+新增 15 个类、1,259 行代码，类内注释 417 行（注释率 33%）。
 维护代码的质量检查：
 
-- **单元测试**：32 条 JVM 单测全部通过（`ProviderSqlTest` 7、`NoteBackupCodecTest` 9、
-  `AiResultParserTest` 8、`LocalNoteAnalyzerTest` 8），覆盖 SQL 构造、备份编解码、
-  AI 结果解析与离线分析四个纯逻辑模块。
+- **单元测试**：40 条 JVM 单测全部通过（`ProviderSqlTest` 7、`NoteBackupCodecTest` 9、
+  `AiResultParserTest` 8、`LocalNoteAnalyzerTest` 8、`ReminderRepeatsTest` 8），覆盖
+  SQL 构造、备份编解码、AI 结果解析、离线分析与重复规则五个纯逻辑模块。
 - **Android Lint**（AGP 9.0，`lintDebug`）：首轮 180 个问题（6 Error / 174 Warning），
-  修复 6 个 Error 后为 0 Error / 174 Warning。3 个 Error 是原始代码遗留
-  （`-View.VISIBLE` 异常写法、布局缺 orientation、4 条字符串缺中文翻译），
-  已在维护中修复；剩余 Warning 以资源与国际化建议为主
+  修复 6 个 Error 后为 0 Error / 174 Warning；9 项维护全部完成后重扫为
+  0 Error / 178 Warning（M7–M9 新增 4 条资源与国际化类 Warning）。
+  3 个 Error 是原始代码遗留（`-View.VISIBLE` 异常写法、布局缺 orientation、
+  4 条字符串缺中文翻译），已在维护中修复；剩余 Warning 以资源与国际化建议为主
   （`docs/analysis/lint/`）。
-- **SonarQube**（Community Build 26.11）：维护后 42 个问题（漏洞 40、Bug 2、坏味道 0），
-  安全性评级由原始代码的 D 升到 C；与原始代码对比注释密度 5.1% → 21.1%、
-  漏洞 51 → 40，两个 CRITICAL（S5322/S5324）随维护修复消失
+- **SonarQube**（Community Build 26.11，9 项维护完成后重扫）：维护后 42 个问题
+  （漏洞 40、Bug 2、坏味道 0），安全性评级由原始代码的 D 升到 C；与原始代码对比
+  注释密度 5.1% → 21.4%、漏洞 51 → 40，两个 CRITICAL（S5322/S5324）随维护修复消失
   （`docs/analysis/sonar/`）。
 
 ### 3.4 维护后的软件原型
@@ -187,10 +198,15 @@ UI（列表/编辑）
 | 恢复确认 | `logs/m3_restore_confirm.png` | 恢复前确认、坏文件不改动数据 |
 | AI 分析结果 | `logs/m6_ai_result.png` | 摘要与待办列表，确认后写入 |
 | AI 写入后 | `logs/m6_inserted.png` | 确认后摘要/待办出现在便签中 |
+| 深色模式 | `logs/m7_dark_list.png` | M7 深色下列表渲染，便签纸与文字保持浅色纸样式 |
+| 置顶列表 | `logs/m8_pinned_list.png` | M8 置顶便签带图钉标记、排序靠前 |
+| 重复方式 | `logs/m9_repeat_dialog.png` | M9 每天/每周/工作日三档选择 |
+| 重复触发 | `logs/m9_fired_notification.png` | 到点通知后自动推进下一次 |
 
-完整操作流程：新建便签 → 输入正文 → 设置提醒 → 到点收到通知 → 删除便签
-（进回收站）→ 从回收站恢复 → 导出 txt / 备份 JSON → 从 JSON 恢复 →
-AI 摘要与待办提取。每一步均以截图记录，异常场景（坏 JSON、空备份）单独留证。
+完整操作流程：新建便签 → 输入正文 → 设置提醒（可加重复规则）→ 到点收到通知 →
+删除便签（进回收站）→ 从回收站恢复 → 导出 txt / 备份 JSON → 从 JSON 恢复 →
+AI 摘要与待办提取 → 切换深色模式 → 置顶便签。每一步均以截图记录，异常场景
+（坏 JSON、空备份、重复提醒在改系统时间后的重复触发）单独留证。
 
 ## 4 实践收获和体会
 
@@ -207,9 +223,9 @@ AI 摘要与待办提取。每一步均以截图记录，异常场景（坏 JSON
 PendingIntent 可变性、通知渠道、精确闹钟、分区存储，每一项都是 Android
 近几年新增的硬性要求，逐项修复的过程基本覆盖了 Android 应用兼容适配的主要知识点。
 
-**测试是维护的安全网。** 把 SQL 构造、备份编解码、AI 结果解析、离线分析
-四块纯逻辑抽成不依赖 Android 框架的类后，32 条 JVM 单测可以在秒级给出反馈；
-后续改动的回归成本大幅下降。
+**测试是维护的安全网。** 把 SQL 构造、备份编解码、AI 结果解析、离线分析与
+重复规则五块纯逻辑抽成不依赖 Android 框架的类后，40 条 JVM 单测可以在秒级
+给出反馈；后续改动的回归成本大幅下降。
 
 **分工与接口先行。** 三人并行时先约定接口（类名、方法签名、数据格式），
 各自实现再合并，冲突和返工明显减少。
@@ -230,7 +246,7 @@ PendingIntent 可变性、通知渠道、精确闹钟、分区存储，每一项
    每次只给一个包或一个链路（如「编辑 → WorkingNote → Note → Provider」）。
 2. **标注规范先行**：先写一份标注规范（四级口径与分档表），再让模型按规范
    逐类产出；产出后用脚本校验「只加注释、不改代码、不删除行」。
-3. **维护项拆分**：每个维护项（M1–M6）单独开工、单独提交、单独验证，
+3. **维护项拆分**：每个维护项（M1–M9）单独开工、单独提交、单独验证，
    不让模型一次改多个维护项。
 4. **验证闭环**：模型的每个产出都必须经过「编译 → 单测 → 模拟器操作截图」
    三步，任一步失败就回到提示词修正。

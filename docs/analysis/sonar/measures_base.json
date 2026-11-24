@@ -1,1 +1,35 @@
-{"component":{"key":"micode-notes-base","name":"MiCode Notes Base","qualifier":"TRK","measures":[{"metric":"complexity","value":"1325"},{"metric":"reliability_rating","value":"3.0","bestValue":false},{"metric":"code_smells","value":"0","bestValue":true},{"metric":"duplicated_lines_density","value":"2.9","bestValue":false},{"metric":"functions","value":"471"},{"metric":"security_rating","value":"4.0","bestValue":false},{"metric":"classes","value":"65"},{"metric":"comment_lines_density","value":"5.1","bestValue":false},{"metric":"sqale_index","value":"0","bestValue":true},{"metric":"sqale_rating","value":"1.0","bestValue":true},{"metric":"bugs","value":"2","bestValue":false},{"metric":"comment_lines","value":"401"},{"metric":"cognitive_complexity","value":"1403","bestValue":false},{"metric":"duplicated_blocks","value":"14","bestValue":false},{"metric":"duplicated_files","value":"5","bestValue":false},{"metric":"ncloc","value":"7395"},{"metric":"files","value":"39"},{"metric":"vulnerabilities","value":"51","bestValue":false}]}}
+{
+  "measures": {
+    "complexity": "1325",
+    "reliability_rating": "3.0",
+    "code_smells": "0",
+    "duplicated_lines_density": "2.9",
+    "functions": "471",
+    "security_rating": "4.0",
+    "classes": "65",
+    "comment_lines_density": "5.1",
+    "sqale_index": "0",
+    "sqale_rating": "1.0",
+    "bugs": "2",
+    "comment_lines": "401",
+    "cognitive_complexity": "1403",
+    "ncloc": "7395",
+    "files": "39",
+    "vulnerabilities": "51"
+  },
+  "issues": {
+    "total": 53,
+    "rules": {
+      "java:S4507": 42,
+      "java:S5320": 7,
+      "java:S3923": 2,
+      "java:S5324": 1,
+      "java:S5322": 1
+    },
+    "types": {
+      "VULNERABILITY": 51,
+      "BUG": 2,
+      "CODE_SMELL": 0
+    }
+  }
+}
