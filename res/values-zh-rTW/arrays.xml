@@ -32,4 +32,12 @@
         <item>短信</item>
         <item>郵件</item>
     </string-array>
+
+    <!-- M9：提醒重複方式選項；順序與 ReminderRepeats 常量一致 -->
+    <string-array name="repeat_rule_entries">
+        <item>不重複</item>
+        <item>每天</item>
+        <item>每週</item>
+        <item>工作日</item>
+    </string-array>
 </resources>

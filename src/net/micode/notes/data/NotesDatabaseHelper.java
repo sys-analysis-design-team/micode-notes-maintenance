@@ -45,7 +45,7 @@ public class NotesDatabaseHelper extends SQLiteOpenHelper {
 
     // 结构版本：1 初始结构、2 删表重建、3 增加 gtask_id 与回收站文件夹、4 增加 version 列。
     // 改表结构必须同步 upgradeToVx()，否则老用户会停留在旧结构上。
-    private static final int DB_VERSION = 5;
+    private static final int DB_VERSION = 6;
 
     // 表名常量：建表 SQL、触发器、Provider 都从这里拼接，避免表名字符串散落各处
     public interface TABLE {
@@ -84,7 +84,9 @@ public class NotesDatabaseHelper extends SQLiteOpenHelper {
             NoteColumns.GTASK_ID + " TEXT NOT NULL DEFAULT ''," +
             NoteColumns.VERSION + " INTEGER NOT NULL DEFAULT 0," +
             // v5 起：置顶标志，0 普通 / 1 置顶；老数据默认 0
-            NoteColumns.PINNED + " INTEGER NOT NULL DEFAULT 0" +
+            NoteColumns.PINNED + " INTEGER NOT NULL DEFAULT 0," +
+            // v6 起：提醒重复规则，0 不重复 / 1 每天 / 2 每周 / 3 工作日
+            NoteColumns.REPEAT_RULE + " INTEGER NOT NULL DEFAULT 0" +
         ")";
 
     // data 表：一条便签可有多行数据，用 mime_type 区分业务类型；data1~data5 是多态列——
@@ -444,14 +446,19 @@ public class NotesDatabaseHelper extends SQLiteOpenHelper {
             oldVersion++;
         }
 
+        if (oldVersion == 5) {
+            upgradeToV6(db);
+            oldVersion++;
+        }
+
         if (reCreateTriggers) {
             reCreateNoteTableTriggers(db);
             reCreateDataTableTriggers(db);
         }
 
         // 版本号没有推进到 newVersion 说明迁移分支缺失，直接抛异常而不是带病运行；
-        // 注意：v1 分支只把 oldVersion 推到 2 且跳过后续分支，在 DB_VERSION=5 下无法走到这里，
-        // 即 v1 直升 v5 的路径实际不可用，属于历史遗留分支
+        // 注意：v1 分支只把 oldVersion 推到 2 且跳过后续分支，在 DB_VERSION=6 下无法走到这里，
+        // 即 v1 直升 v6 的路径实际不可用，属于历史遗留分支
         if (oldVersion != newVersion) {
             throw new IllegalStateException("Upgrade notes database to version " + newVersion
                     + "fails");
@@ -508,6 +515,16 @@ public class NotesDatabaseHelper extends SQLiteOpenHelper {
      */
     private void upgradeToV5(SQLiteDatabase db) {
         db.execSQL("ALTER TABLE " + TABLE.NOTE + " ADD COLUMN " + NoteColumns.PINNED
+                + " INTEGER NOT NULL DEFAULT 0");
+    }
+
+    /**
+     * v5→v6：追加 repeat_rule 列，支持提醒重复（M9）。
+     *
+     * <p>纯新增列，不改动触发器；老数据默认 0（不重复），升级后提醒行为与升级前一致。</p>
+     */
+    private void upgradeToV6(SQLiteDatabase db) {
+        db.execSQL("ALTER TABLE " + TABLE.NOTE + " ADD COLUMN " + NoteColumns.REPEAT_RULE
                 + " INTEGER NOT NULL DEFAULT 0");
     }
 }

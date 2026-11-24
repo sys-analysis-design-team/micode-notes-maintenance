@@ -219,6 +219,16 @@ public class Notes {
          * 文件夹行恒为 0；列表查询按该列降序排序，置顶便签排在非置顶之前。</p>
          */
         public static final String PINNED = "pinned";
+
+        /**
+         * Repeat rule of the reminder
+         * <P> Type : INTEGER (0 = none, 1 = daily, 2 = weekly, 3 = weekdays) </P>
+         *
+         * <p>中文（M9 提醒重复）：提醒重复规则，数据库 v6 新增列。取值与
+         * {@link net.micode.notes.tool.ReminderRepeats} 的常量一致；
+         * 只对设置了提醒的便签有意义。</p>
+         */
+        public static final String REPEAT_RULE = "repeat_rule";
     }
 
     public interface DataColumns {

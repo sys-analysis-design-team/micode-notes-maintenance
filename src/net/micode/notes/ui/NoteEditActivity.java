@@ -66,6 +66,7 @@ import net.micode.notes.tool.AiSettings;
 import net.micode.notes.tool.DataUtils;
 import net.micode.notes.tool.LocalNoteAnalyzer;
 import net.micode.notes.tool.ReminderNotifier;
+import net.micode.notes.tool.ReminderRepeats;
 import net.micode.notes.tool.ReminderScheduler;
 import net.micode.notes.tool.ResourceParser;
 import net.micode.notes.tool.ResourceParser.TextAppearanceResources;
@@ -312,18 +313,43 @@ public class NoteEditActivity extends Activity implements OnClickListener,
     private void showAlertHeader() {
         if (mWorkingNote.hasClockAlert()) {
             long time = System.currentTimeMillis();
+            CharSequence dateText;
             if (time > mWorkingNote.getAlertDate()) {
-                mNoteHeaderHolder.tvAlertDate.setText(R.string.note_alert_expired);
+                dateText = getString(R.string.note_alert_expired);
             } else {
-                mNoteHeaderHolder.tvAlertDate.setText(DateUtils.getRelativeTimeSpanString(
-                        mWorkingNote.getAlertDate(), time, DateUtils.MINUTE_IN_MILLIS));
+                dateText = DateUtils.getRelativeTimeSpanString(
+                        mWorkingNote.getAlertDate(), time, DateUtils.MINUTE_IN_MILLIS);
             }
+            // M9：有重复规则时在相对时间后追加「·每天/·每周/·工作日」
+            int repeatRule = mWorkingNote.getAlertRepeat();
+            int repeatLabelRes = repeatLabelRes(repeatRule);
+            if (repeatLabelRes != 0) {
+                dateText = getString(R.string.reminder_repeat_suffix, dateText,
+                        getString(repeatLabelRes));
+            }
+            mNoteHeaderHolder.tvAlertDate.setText(dateText);
             mNoteHeaderHolder.tvAlertDate.setVisibility(View.VISIBLE);
             mNoteHeaderHolder.ivAlertIcon.setVisibility(View.VISIBLE);
         } else {
             mNoteHeaderHolder.tvAlertDate.setVisibility(View.GONE);
             mNoteHeaderHolder.ivAlertIcon.setVisibility(View.GONE);
         };
+    }
+
+    /**
+     * M9：把重复规则映射为显示用标签；不重复或未知值返回 0。
+     */
+    private static int repeatLabelRes(int rule) {
+        switch (rule) {
+            case ReminderRepeats.DAILY:
+                return R.string.reminder_repeat_daily;
+            case ReminderRepeats.WEEKLY:
+                return R.string.reminder_repeat_weekly;
+            case ReminderRepeats.WEEKDAYS:
+                return R.string.reminder_repeat_weekdays;
+            default:
+                return 0;
+        }
     }
 
     @Override
@@ -552,6 +578,8 @@ public class NoteEditActivity extends Activity implements OnClickListener,
         } else if (itemId == R.id.menu_alert) {
             setReminder();
         } else if (itemId == R.id.menu_delete_remind) {
+            // M9：删除提醒时一并清掉重复规则，避免残留规则影响下次设置
+            mWorkingNote.setAlertRepeat(ReminderRepeats.NONE);
             mWorkingNote.setAlertDate(0, false);
         }
         return true;
@@ -579,10 +607,42 @@ public class NoteEditActivity extends Activity implements OnClickListener,
                     showToast(R.string.reminder_time_passed);
                     return;
                 }
-                mWorkingNote.setAlertDate(date, true);
+                // M9：选定时间后再选重复方式，选完才真正设置并调度
+                showRepeatChooser(date);
             }
         });
         d.show();
+    }
+
+    /**
+     * M9：重复方式选择对话框。
+     *
+     * <p>选项顺序与 {@link ReminderRepeats} 常量一致：0 不重复、1 每天、2 每周、3 工作日，
+     * 因此单选项下标可以直接作为规则值。默认选中该便签当前的重复规则；
+     * 取消则本次提醒设置不生效（时间与规则都保持原样）。</p>
+     *
+     * @param date 用户在日期时间对话框里确认的时间戳
+     */
+    private void showRepeatChooser(final long date) {
+        final int[] selectedRule = { mWorkingNote.getAlertRepeat() };
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle(R.string.reminder_repeat_title);
+        builder.setSingleChoiceItems(R.array.repeat_rule_entries, selectedRule[0],
+                new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int which) {
+                        selectedRule[0] = which;
+                    }
+                });
+        builder.setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int which) {
+                // 先写重复规则再设时间：onClockAlertChanged 会先 saveNote 再调度，
+                // 两个字段在同一次保存里落库
+                mWorkingNote.setAlertRepeat(selectedRule[0]);
+                mWorkingNote.setAlertDate(date, true);
+            }
+        });
+        builder.setNegativeButton(android.R.string.cancel, null);
+        builder.show();
     }
 
     /**
@@ -847,9 +907,9 @@ public class NoteEditActivity extends Activity implements OnClickListener,
          * User could set clock to an unsaved note, so before setting the
          * alert clock, we should save the note first
          */
-        if (!mWorkingNote.existInDatabase()) {
-            saveNote();
-        }
+        // M4/M9：未保存的新便签先落库；已有便签也立即保存，
+        // 保证提醒时间与重复规则在到点前已写入数据库（开机重建、重复推进都读数据库）
+        saveNote();
         if (mWorkingNote.getNoteId() > 0) {
             long noteId = mWorkingNote.getNoteId();
             showAlertHeader();

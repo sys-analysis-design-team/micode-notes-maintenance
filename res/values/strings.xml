@@ -46,6 +46,12 @@
     <string name="reminder_exact_positive">Open settings</string>
     <string name="reminder_exact_negative">Set anyway</string>
     <string name="reminder_time_passed">Reminder time must be later than now</string>
+    <!-- M9 reminder repeat -->
+    <string name="reminder_repeat_title">Repeat</string>
+    <string name="reminder_repeat_daily">Every day</string>
+    <string name="reminder_repeat_weekly">Every week</string>
+    <string name="reminder_repeat_weekdays">Weekdays</string>
+    <string name="reminder_repeat_suffix">%1$s · %2$s</string>
     <!-- M6 AI analysis -->
     <string name="menu_ai_analyze">AI summary &amp; to-dos</string>
     <string name="menu_ai_settings">AI settings</string>

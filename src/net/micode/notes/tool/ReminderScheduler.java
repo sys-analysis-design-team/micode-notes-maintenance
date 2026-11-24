@@ -18,6 +18,8 @@ package net.micode.notes.tool;
 
 import android.app.AlarmManager;
 import android.app.PendingIntent;
+import android.content.ContentUris;
+import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
@@ -87,14 +89,19 @@ public final class ReminderScheduler {
         pendingIntent.cancel();
     }
 
-    /** 开机、应用升级、系统时间变化后重建所有未来提醒。 */
+    /**
+     * 开机、应用升级、系统时间变化后重建所有未来提醒。
+     *
+     * <p>M9：重复提醒如果已过期（关机期间错过一次或多次），这里把它推进到未来的第一个
+     * 有效时间点并写回数据库，只补一次调度、不补发历史通知；一次性提醒过期则跳过。</p>
+     */
     public static void rescheduleAll(Context context) {
         long now = System.currentTimeMillis();
         Cursor cursor = context.getContentResolver().query(Notes.CONTENT_NOTE_URI,
-                new String[] { NoteColumns.ID, NoteColumns.ALERTED_DATE },
-                NoteColumns.ALERTED_DATE + ">? AND " + NoteColumns.TYPE + "=? AND "
+                new String[] { NoteColumns.ID, NoteColumns.ALERTED_DATE, NoteColumns.REPEAT_RULE },
+                NoteColumns.ALERTED_DATE + ">0 AND " + NoteColumns.TYPE + "=? AND "
                         + NoteColumns.PARENT_ID + "<>?",
-                new String[] { String.valueOf(now), String.valueOf(Notes.TYPE_NOTE),
+                new String[] { String.valueOf(Notes.TYPE_NOTE),
                         String.valueOf(Notes.ID_TRASH_FOLER) },
                 null);
         if (cursor == null) {
@@ -106,13 +113,75 @@ public final class ReminderScheduler {
             while (cursor.moveToNext()) {
                 long noteId = cursor.getLong(0);
                 long alertDate = cursor.getLong(1);
-                schedule(context, noteId, alertDate);
-                count++;
+                int repeatRule = cursor.getInt(2);
+                if (alertDate > now) {
+                    schedule(context, noteId, alertDate);
+                    count++;
+                } else if (ReminderRepeats.isRepeating(repeatRule)) {
+                    long next = ReminderRepeats.nextTrigger(alertDate, repeatRule, now);
+                    if (next > 0) {
+                        updateAlertDate(context, noteId, next);
+                        schedule(context, noteId, next);
+                        count++;
+                    }
+                }
             }
         } finally {
             cursor.close();
         }
         Log.i(TAG, "Rescheduled " + count + " reminders");
+    }
+
+    /**
+     * M9：重复提醒触发后，把 alerted_date 推进到下一次并重新调度。
+     *
+     * <p>由 AlarmReceiver 在发出通知后调用。只更新 ALERTED_DATE（系统行为，不标记
+     * LOCAL_MODIFIED、不改 MODIFIED_DATE），与设置提醒时的落库口径一致。</p>
+     *
+     * @return 下一次触发时间；便签不存在、不重复或计算失败时返回 0
+     */
+    public static long advanceRepeat(Context context, long noteId) {
+        Cursor cursor = context.getContentResolver().query(
+                ContentUris.withAppendedId(Notes.CONTENT_NOTE_URI, noteId),
+                new String[] { NoteColumns.ALERTED_DATE, NoteColumns.REPEAT_RULE },
+                NoteColumns.TYPE + "=?", new String[] { String.valueOf(Notes.TYPE_NOTE) }, null);
+        if (cursor == null) {
+            Log.e(TAG, "Advance repeat query failed: " + noteId);
+            return 0;
+        }
+        long alertDate;
+        int repeatRule;
+        try {
+            if (!cursor.moveToFirst()) {
+                return 0;
+            }
+            alertDate = cursor.getLong(0);
+            repeatRule = cursor.getInt(1);
+        } finally {
+            cursor.close();
+        }
+        long now = System.currentTimeMillis();
+        if (alertDate > now) {
+            // 数据库里的时间已被其它路径推进过（典型场景：改系统时间时 rescheduleAll
+            // 先补偿了下一次，随后过期闹钟才派发到这里）。此时只确保调度存在，
+            // 不再推进，避免一次触发跳掉一整天。
+            schedule(context, noteId, alertDate);
+            return alertDate;
+        }
+        long next = ReminderRepeats.nextTrigger(alertDate, repeatRule, now);
+        if (next <= 0) {
+            return 0;
+        }
+        updateAlertDate(context, noteId, next);
+        schedule(context, noteId, next);
+        return next;
+    }
+
+    private static void updateAlertDate(Context context, long noteId, long alertDate) {
+        ContentValues values = new ContentValues();
+        values.put(NoteColumns.ALERTED_DATE, alertDate);
+        context.getContentResolver().update(
+                ContentUris.withAppendedId(Notes.CONTENT_NOTE_URI, noteId), values, null, null);
     }
 
     /** Android 12+ 需要 SCHEDULE_EXACT_ALARM 才能在 Doze 下准点触发。 */

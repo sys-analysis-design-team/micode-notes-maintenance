@@ -62,6 +62,9 @@ public class WorkingNote {
     // 提醒时间（毫秒）；0 表示未设置
     private long mAlertDate;
 
+    // M9：提醒重复规则（0 不重复 / 1 每天 / 2 每周 / 3 工作日）
+    private int mRepeatRule;
+
     // 从库里读到的最后修改时间；新便签取构造时刻
     private long mModifiedDate;
 
@@ -104,7 +107,8 @@ public class WorkingNote {
             NoteColumns.BG_COLOR_ID,
             NoteColumns.WIDGET_ID,
             NoteColumns.WIDGET_TYPE,
-            NoteColumns.MODIFIED_DATE
+            NoteColumns.MODIFIED_DATE,
+            NoteColumns.REPEAT_RULE
     };
 
     // 以下为数据行的投影下标：0=ID、1=正文、2=mime、3=data1（正文行存清单模式）
@@ -129,12 +133,15 @@ public class WorkingNote {
 
     private static final int NOTE_MODIFIED_DATE_COLUMN = 5;
 
+    private static final int NOTE_REPEAT_RULE_COLUMN = 6;
+
     // New note construct
     // 新建便签：不读库、不占主键；mNoteId 保持 0，首次 saveNote() 时才插入占位行换 ID。
     // 提醒时间默认 0（无提醒），Widget 类型置 -1（未绑定），由工厂方法再覆盖
     private WorkingNote(Context context, long folderId) {
         mContext = context;
         mAlertDate = 0;
+        mRepeatRule = 0;
         mModifiedDate = System.currentTimeMillis();
         mFolderId = folderId;
         mNote = new Note();
@@ -178,6 +185,7 @@ public class WorkingNote {
                 mWidgetId = cursor.getInt(NOTE_WIDGET_ID_COLUMN);
                 mWidgetType = cursor.getInt(NOTE_WIDGET_TYPE_COLUMN);
                 mAlertDate = cursor.getLong(NOTE_ALERTED_DATE_COLUMN);
+                mRepeatRule = cursor.getInt(NOTE_REPEAT_RULE_COLUMN);
                 mModifiedDate = cursor.getLong(NOTE_MODIFIED_DATE_COLUMN);
             }
             cursor.close();
@@ -339,6 +347,28 @@ public class WorkingNote {
         if (mNoteSettingStatusListener != null) {
             mNoteSettingStatusListener.onClockAlertChanged(date, set);
         }
+    }
+
+    /**
+     * 设置提醒重复规则（M9）。
+     *
+     * <p>只写内存与 Note 差异缓存，落库仍需 {@link #saveNote()}；
+     * 取消提醒时调用方应同步写 {@link net.micode.notes.tool.ReminderRepeats#NONE}。</p>
+     *
+     * @param rule 0 不重复 / 1 每天 / 2 每周 / 3 工作日
+     */
+    public void setAlertRepeat(int rule) {
+        if (rule != mRepeatRule) {
+            mRepeatRule = rule;
+            mNote.setNoteValue(NoteColumns.REPEAT_RULE, String.valueOf(mRepeatRule));
+        }
+    }
+
+    /**
+     * @return 当前提醒重复规则；0 表示不重复
+     */
+    public int getAlertRepeat() {
+        return mRepeatRule;
     }
 
     /**

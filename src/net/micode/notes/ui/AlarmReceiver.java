@@ -74,6 +74,11 @@ public class AlarmReceiver extends BroadcastReceiver {
             // 通知权限被关闭时无法弹出提醒；编辑页会在设置提醒时给出说明。
             Log.w(TAG, "Notification permission denied, reminder dropped: " + noteId);
         }
+        // M9：重复提醒在本次触发后推进到下一次；不重复的便签此调用无副作用
+        long next = ReminderScheduler.advanceRepeat(context, noteId);
+        if (next > 0) {
+            Log.i(TAG, "Repeat reminder rescheduled: " + noteId + " -> " + next);
+        }
     }
 
         /**

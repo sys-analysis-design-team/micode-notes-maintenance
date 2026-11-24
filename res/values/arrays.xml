@@ -40,4 +40,12 @@
         <item>Messaging</item>
         <item>Email</item>
     </string-array>
+
+    <!-- M9：提醒重复方式选项；顺序与 ReminderRepeats 常量一致（0 不重复 / 1 每天 / 2 每周 / 3 工作日） -->
+    <string-array name="repeat_rule_entries">
+        <item>Does not repeat</item>
+        <item>Every day</item>
+        <item>Every week</item>
+        <item>Weekdays</item>
+    </string-array>
 </resources>

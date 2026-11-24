@@ -46,6 +46,12 @@
     <string name="reminder_exact_positive">去開啟</string>
     <string name="reminder_exact_negative">仍然設定</string>
     <string name="reminder_time_passed">提醒時間必須晚於目前時間</string>
+    <!-- M9 提醒重複 -->
+    <string name="reminder_repeat_title">重複方式</string>
+    <string name="reminder_repeat_daily">每天</string>
+    <string name="reminder_repeat_weekly">每週</string>
+    <string name="reminder_repeat_weekdays">工作日</string>
+    <string name="reminder_repeat_suffix">%1$s · %2$s</string>
     <!-- M6 AI 分析 -->
     <string name="menu_ai_analyze">AI 摘要與待辦</string>
     <string name="menu_ai_settings">AI 設定</string>
