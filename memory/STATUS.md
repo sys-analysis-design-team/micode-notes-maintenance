@@ -84,8 +84,8 @@
 3. PPT：已换新类图与数字（本次收尾提交）；剩演示录屏（25 秒连续操作）、组员功能定后回填第 8 页占位卡与第 10 页分工。
 4. 组员新功能提名：11/26 前收「功能名 + 做什么 + 怎么做」三行，汇总查重；成员功能合并后重跑
    `python tools/count_maintenance.py`、`python tools/scan_sonar.py --skip-base`、`sh gradlew lintDebug`，重渲染类图再回填 PPT。
-5. 推送状态（2026-11-24）：github.com 的 git 传输被网络重置，改走 GitHub API 通道推送成功
-   —— 远端 develop head = `10b0a060`（树与本地 `572779b` 一致；中间 `a96e97db` 是首次 API
-   推送的 CRLF 版本，已被后一个提交完全覆盖）。**本地与远端历史分叉（内容一致、SHA 不同），
-   网络恢复后执行 `git fetch origin && git reset --hard origin/develop` 对齐。**
-   兜底脚本：`tools/gh_api_push.py`（提交里的精确 blob，不读工作区）；本次收尾提交（UML/报告/PPT 同步）尚未推送。
+5. 推送状态（2026-11-24）：git 通道恢复后已 fetch + rebase 对齐（本地独有的 PPT v2、push 脚本
+   两个提交因内容已在远端被跳过），收尾提交已 ff 推送。**远端 develop = 本地 HEAD = `134debb`
+   （master..HEAD 24 提交，工作区干净）**；历史中 `a96e97db` 是 API 通道首次推送的 CRLF 版本，
+   已被 `5c0055b` 覆盖。
+   兜底脚本：`tools/gh_api_push.py`（提交里的精确 blob，不读工作区）。

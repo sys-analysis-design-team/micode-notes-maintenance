@@ -265,7 +265,7 @@ def closeout_page(d: Deck) -> None:
     d.text(s, 6.6, 4.86, 6.1, 1.7,
            "gtask 退役包 36 个旧问题保留未修；Lint 剩余 178 个资源类 Warning 未逐条处理；"
            "AI 仅支持 OpenAI 兼容接口。\n"
-           "9 项维护 +3,451 / −1,068 行、33 个文件；develop 领先 master 24 个提交；"
+           "9 项维护 +3,451 / −1,068 行、33 个文件；develop 领先 master 25 个提交；"
            "报告、UML、扫描原始数据随交付包提供。",
            size=9.5, color=MUTED, line_spacing=1.35)
     d.text(s, MARGIN, 6.6, 9.0, 0.35, "谢谢，请老师提问", size=12.5, color=TEAL_DARK)
