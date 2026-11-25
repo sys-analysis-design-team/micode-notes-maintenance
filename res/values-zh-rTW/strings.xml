@@ -207,4 +207,12 @@
         <item quantity="other"><xliff:g id="NUMBER">%1$s</xliff:g> 條符合”<xliff:g id="SEARCH">%2$s</xliff:g>“的搜尋結果</item>
     </plurals>
 
+
+    <string name="menu_note_sort">清單排序</string>
+    <string name="note_sort_modified_newest">最後編輯時間（從新到舊）</string>
+    <string name="note_sort_modified_oldest">最後編輯時間（從舊到新）</string>
+    <string name="note_sort_created_newest">建立時間（從新到舊）</string>
+    <string name="note_sort_created_oldest">建立時間（從舊到新）</string>
+    <string name="menu_text_statistics">正文統計</string>
+    <string name="note_text_statistics">字元數（含空白）：%1$d\n字元數（不含空白）：%2$d\n非空白行數：%3$d</string>
 </resources>

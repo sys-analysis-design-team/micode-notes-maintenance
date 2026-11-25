@@ -65,6 +65,7 @@ import net.micode.notes.tool.AiClient;
 import net.micode.notes.tool.AiSettings;
 import net.micode.notes.tool.DataUtils;
 import net.micode.notes.tool.LocalNoteAnalyzer;
+import net.micode.notes.tool.NoteTextStatistics;
 import net.micode.notes.tool.ReminderNotifier;
 import net.micode.notes.tool.ReminderRepeats;
 import net.micode.notes.tool.ReminderScheduler;
@@ -571,6 +572,8 @@ public class NoteEditActivity extends Activity implements OnClickListener,
         } else if (itemId == R.id.menu_share) {
             getWorkingText();
             sendTo(this, mWorkingNote.getContent());
+        } else if (itemId == R.id.menu_text_statistics) {
+            showTextStatistics();
         } else if (itemId == R.id.menu_send_to_desktop) {
             sendToDesktop();
         } else if (itemId == R.id.menu_ai_analyze) {
@@ -583,6 +586,36 @@ public class NoteEditActivity extends Activity implements OnClickListener,
             mWorkingNote.setAlertDate(0, false);
         }
         return true;
+    }
+
+    private void showTextStatistics() {
+        NoteTextStatistics statistics = NoteTextStatistics.from(getTextForStatistics());
+        new AlertDialog.Builder(this)
+                .setTitle(R.string.menu_text_statistics)
+                .setMessage(getString(R.string.note_text_statistics, statistics.characters,
+                        statistics.nonWhitespaceCharacters, statistics.nonBlankLines))
+                .setPositiveButton(android.R.string.ok, null)
+                .show();
+    }
+
+    private CharSequence getTextForStatistics() {
+        if (mWorkingNote.getCheckListMode() != TextNote.MODE_CHECK_LIST) {
+            return mNoteEditor.getText();
+        }
+
+        // 读取当前可见的清单正文，避开序列化时插入的勾选标记和末尾换行。
+        StringBuilder text = new StringBuilder();
+        for (int i = 0; i < mEditTextList.getChildCount(); i++) {
+            View row = mEditTextList.getChildAt(i);
+            NoteEditText field = row.findViewById(R.id.et_edit_text);
+            if (field.length() > 0) {
+                if (text.length() > 0) {
+                    text.append('\n');
+                }
+                text.append(field.getText());
+            }
+        }
+        return text;
     }
 
     private void setReminder() {

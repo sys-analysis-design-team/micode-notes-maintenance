@@ -62,6 +62,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import net.micode.notes.R;
+import net.micode.notes.data.NoteListSort;
 import net.micode.notes.data.Notes;
 import net.micode.notes.data.Notes.NoteColumns;
 import net.micode.notes.model.WorkingNote;
@@ -83,6 +84,7 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
 import java.text.SimpleDateFormat;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
@@ -101,6 +103,8 @@ public class NotesListActivity extends Activity implements OnClickListener, OnIt
 
     private static final String PREFERENCE_ADD_INTRODUCTION = "net.micode.notes.introduction";
 
+    private static final String PREFERENCE_LIST_SORT = "net.micode.notes.list_sort";
+
     private enum ListEditState {
         NOTE_LIST, SUB_FOLDER, CALL_RECORD_FOLDER
     };
@@ -108,6 +112,8 @@ public class NotesListActivity extends Activity implements OnClickListener, OnIt
     private ListEditState mState;
 
     private BackgroundQueryHandler mBackgroundQueryHandler;
+
+    private Object mLatestNotesQuery;
 
     private NotesListAdapter mNotesListAdapter;
 
@@ -469,11 +475,12 @@ public class NotesListActivity extends Activity implements OnClickListener, OnIt
     private void startAsyncNotesListQuery() {
         String selection = (mCurrentFolderId == Notes.ID_ROOT_FOLDER) ? ROOT_FOLDER_SELECTION
                 : NORMAL_SELECTION;
-        mBackgroundQueryHandler.startQuery(FOLDER_NOTE_LIST_QUERY_TOKEN, null,
-                Notes.CONTENT_NOTE_URI, NoteItemData.PROJECTION, selection, new String[] {
-                    String.valueOf(mCurrentFolderId)
-                }, NoteColumns.TYPE + " DESC," + NoteColumns.PINNED + " DESC,"
-                        + NoteColumns.MODIFIED_DATE + " DESC");
+        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
+        NoteListSort sort = NoteListSort.fromPreference(preferences.getString(PREFERENCE_LIST_SORT, null));
+        mLatestNotesQuery = new Object();
+        mBackgroundQueryHandler.startQuery(FOLDER_NOTE_LIST_QUERY_TOKEN, mLatestNotesQuery,
+                Notes.CONTENT_NOTE_URI, NoteItemData.PROJECTION, selection,
+                new String[] { String.valueOf(mCurrentFolderId) }, sort.toSql());
     }
 
     private final class BackgroundQueryHandler extends AsyncQueryHandler {
@@ -485,7 +492,11 @@ public class NotesListActivity extends Activity implements OnClickListener, OnIt
         protected void onQueryComplete(int token, Object cookie, Cursor cursor) {
             switch (token) {
                 case FOLDER_NOTE_LIST_QUERY_TOKEN:
-                    mNotesListAdapter.changeCursor(cursor);
+                    if (cookie == mLatestNotesQuery && !isDestroyed()) {
+                        mNotesListAdapter.changeCursor(cursor);
+                    } else if (cursor != null) {
+                        cursor.close();
+                    }
                     break;
                 case FOLDER_LIST_QUERY_TOKEN:
                     if (cursor != null && cursor.getCount() > 0) {
@@ -830,6 +841,8 @@ public class NotesListActivity extends Activity implements OnClickListener, OnIt
         int itemId = item.getItemId();
         if (itemId == R.id.menu_new_folder) {
             showCreateOrModifyFolderDialog(true);
+        } else if (itemId == R.id.menu_note_sort) {
+            showNoteSortDialog();
         } else if (itemId == R.id.menu_export_text) {
             exportNoteToText();
         } else if (itemId == R.id.menu_backup_json) {
@@ -851,6 +864,33 @@ public class NotesListActivity extends Activity implements OnClickListener, OnIt
             onSearchRequested();
         }
         return true;
+    }
+
+    private void showNoteSortDialog() {
+        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
+        NoteListSort current = NoteListSort.fromPreference(
+                preferences.getString(PREFERENCE_LIST_SORT, null));
+        NoteListSort[] modes = {
+                NoteListSort.MODIFIED_NEWEST, NoteListSort.MODIFIED_OLDEST,
+                NoteListSort.CREATED_NEWEST, NoteListSort.CREATED_OLDEST
+        };
+        CharSequence[] labels = {
+                getString(R.string.note_sort_modified_newest), getString(R.string.note_sort_modified_oldest),
+                getString(R.string.note_sort_created_newest), getString(R.string.note_sort_created_oldest)
+        };
+        int checked = Arrays.asList(modes).indexOf(current);
+        new AlertDialog.Builder(this)
+                .setTitle(R.string.menu_note_sort)
+                .setSingleChoiceItems(labels, checked, (dialog, which) -> {
+                    NoteListSort selected = modes[which];
+                    if (selected != current) {
+                        preferences.edit().putString(PREFERENCE_LIST_SORT, selected.name()).apply();
+                        startAsyncNotesListQuery();
+                    }
+                    dialog.dismiss();
+                })
+                .setNegativeButton(android.R.string.cancel, null)
+                .show();
     }
 
     @Override

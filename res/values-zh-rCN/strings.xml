@@ -211,4 +211,12 @@
     <string name="format_folder_files_count">(%d)</string>
     <string name="preferences_last_sync_time_format">yyyy-MM-dd HH:mm:ss</string>
 
+
+    <string name="menu_note_sort">列表排序</string>
+    <string name="note_sort_modified_newest">最后编辑时间（从新到旧）</string>
+    <string name="note_sort_modified_oldest">最后编辑时间（从旧到新）</string>
+    <string name="note_sort_created_newest">创建时间（从新到旧）</string>
+    <string name="note_sort_created_oldest">创建时间（从旧到新）</string>
+    <string name="menu_text_statistics">正文统计</string>
+    <string name="note_text_statistics">字符数（含空白）：%1$d\n字符数（不含空白）：%2$d\n非空行数：%3$d</string>
 </resources>

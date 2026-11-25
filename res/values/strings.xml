@@ -215,4 +215,12 @@
         <item quantity="other"><xliff:g id="number" example="15">%1$s</xliff:g> results for \"<xliff:g id="search" example="???">%2$s</xliff:g>\"</item>
     </plurals>
 
+
+    <string name="menu_note_sort">List sort order</string>
+    <string name="note_sort_modified_newest">Last edited: newest first</string>
+    <string name="note_sort_modified_oldest">Last edited: oldest first</string>
+    <string name="note_sort_created_newest">Created: newest first</string>
+    <string name="note_sort_created_oldest">Created: oldest first</string>
+    <string name="menu_text_statistics">Text statistics</string>
+    <string name="note_text_statistics">Characters (including whitespace): %1$d\nCharacters (excluding whitespace): %2$d\nNon-blank lines: %3$d</string>
 </resources>
