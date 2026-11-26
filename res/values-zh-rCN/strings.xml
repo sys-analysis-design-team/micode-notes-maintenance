@@ -198,6 +198,11 @@
     <string name="hint_foler_name">请输入名称</string>
     <string name="search_label">正在搜索便签</string>
     <string name="search_hint">搜索便签</string>
+    <string name="search_clear">清除</string>
+    <string name="search_history_delete">删除</string>
+    <string name="search_history_delete_title">删除这条搜索记录？</string>
+    <string name="search_history_clear">清空搜索历史</string>
+    <string name="search_history_clear_title">清空全部搜索历史？</string>
     <string name="search_setting_description">便签中的文字</string>
     <string name="search">便签</string>
     <string name="datetime_dialog_ok">设置</string>
@@ -219,4 +224,15 @@
     <string name="note_sort_created_oldest">创建时间（从旧到新）</string>
     <string name="menu_text_statistics">正文统计</string>
     <string name="note_text_statistics">字符数（含空白）：%1$d\n字符数（不含空白）：%2$d\n非空行数：%3$d</string>
+    <!-- 标签（tag v7） -->
+    <string name="tag_preset_work">工作</string>
+    <string name="tag_preset_study">学习</string>
+    <string name="menu_edit_tags">标签</string>
+    <string name="menu_tag_filter">按标签筛选</string>
+    <string name="tag_filter_all">全部便签</string>
+    <string name="tag_filter_active">筛选：%1$s</string>
+    <string name="tag_dialog_title">标签</string>
+    <string name="tag_new">新建标签…</string>
+    <string name="tag_new_hint">标签名，多个可用逗号分隔</string>
+    <string name="tag_added">已添加标签：%1$s</string>
 </resources>

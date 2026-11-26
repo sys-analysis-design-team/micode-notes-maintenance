@@ -22,6 +22,7 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.util.Log;
 
+import net.micode.notes.R;
 import net.micode.notes.data.Notes.DataColumns;
 import net.micode.notes.data.Notes.DataConstants;
 import net.micode.notes.data.Notes.NoteColumns;
@@ -43,9 +44,10 @@ import net.micode.notes.data.Notes.NoteColumns;
 public class NotesDatabaseHelper extends SQLiteOpenHelper {
     private static final String DB_NAME = "note.db";
 
-    // 结构版本：1 初始结构、2 删表重建、3 增加 gtask_id 与回收站文件夹、4 增加 version 列。
+    // 结构版本：1 初始结构、2 删表重建、3 增加 gtask_id 与回收站文件夹、4 增加 version 列、
+    // 5 增加 pinned 列、6 增加 repeat_rule 列、7 增加标签表。
     // 改表结构必须同步 upgradeToVx()，否则老用户会停留在旧结构上。
-    private static final int DB_VERSION = 6;
+    private static final int DB_VERSION = 7;
 
     // 表名常量：建表 SQL、触发器、Provider 都从这里拼接，避免表名字符串散落各处
     public interface TABLE {
@@ -256,8 +258,12 @@ public class NotesDatabaseHelper extends SQLiteOpenHelper {
      *
      * @param context 用于定位应用私有 databases 目录，实际传入的是 Provider 的 Context
      */
+    private final Context mContext;
+
     public NotesDatabaseHelper(Context context) {
         super(context, DB_NAME, null, DB_VERSION);
+        // 建库/升级时要用 string 资源写入预设标签，保存应用级 Context 避免持有 Activity
+        mContext = context.getApplicationContext();
     }
 
     /**
@@ -400,6 +406,10 @@ public class NotesDatabaseHelper extends SQLiteOpenHelper {
     public void onCreate(SQLiteDatabase db) {
         createNoteTable(db);
         createDataTable(db);
+        // 标签表与预设标签只在建库时创建一次；老库由 onUpgrade 的 v6→v7 分支补齐
+        TagStore.createTables(db);
+        TagStore.seedPresets(db, mContext.getString(R.string.tag_preset_work),
+                mContext.getString(R.string.tag_preset_study));
     }
 
     /**
@@ -451,14 +461,19 @@ public class NotesDatabaseHelper extends SQLiteOpenHelper {
             oldVersion++;
         }
 
+        if (oldVersion == 6) {
+            upgradeToV7(db);
+            oldVersion++;
+        }
+
         if (reCreateTriggers) {
             reCreateNoteTableTriggers(db);
             reCreateDataTableTriggers(db);
         }
 
         // 版本号没有推进到 newVersion 说明迁移分支缺失，直接抛异常而不是带病运行；
-        // 注意：v1 分支只把 oldVersion 推到 2 且跳过后续分支，在 DB_VERSION=6 下无法走到这里，
-        // 即 v1 直升 v6 的路径实际不可用，属于历史遗留分支
+        // 注意：v1 分支只把 oldVersion 推到 2 且跳过后续分支，在 DB_VERSION=7 下无法走到这里，
+        // 即 v1 直升 v7 的路径实际不可用，属于历史遗留分支
         if (oldVersion != newVersion) {
             throw new IllegalStateException("Upgrade notes database to version " + newVersion
                     + "fails");
@@ -526,5 +541,17 @@ public class NotesDatabaseHelper extends SQLiteOpenHelper {
     private void upgradeToV6(SQLiteDatabase db) {
         db.execSQL("ALTER TABLE " + TABLE.NOTE + " ADD COLUMN " + NoteColumns.REPEAT_RULE
                 + " INTEGER NOT NULL DEFAULT 0");
+    }
+
+    /**
+     * v6→v7：新增标签字典表、便签-标签关联表与删除清理触发器，并写入预设标签。
+     *
+     * <p>只新增表，不改 note/data 的列与既有触发器；老库升级后原有便签没有任何标签，
+     * 列表与搜索行为与升级前一致。</p>
+     */
+    private void upgradeToV7(SQLiteDatabase db) {
+        TagStore.createTables(db);
+        TagStore.seedPresets(db, mContext.getString(R.string.tag_preset_work),
+                mContext.getString(R.string.tag_preset_study));
     }
 }

@@ -37,6 +37,56 @@
             android:textColor="#FFEAD1AE"
             android:textSize="@dimen/text_font_size_medium" />
 
+        <!-- v7：应用内搜索栏；默认隐藏，点菜单“搜索”展开 -->
+        <LinearLayout
+            android:id="@+id/search_bar"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:background="#FFF7F3EE"
+            android:gravity="center_vertical"
+            android:orientation="horizontal"
+            android:paddingLeft="12dip"
+            android:paddingRight="4dip"
+            android:visibility="gone" >
+
+            <EditText
+                android:id="@+id/search_input"
+                android:layout_width="0dip"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:background="@null"
+                android:hint="@string/search_hint"
+                android:imeOptions="actionSearch"
+                android:inputType="text"
+                android:singleLine="true"
+                android:textColor="#FF333333"
+                android:textColorHint="#FF999999"
+                android:textSize="@dimen/text_font_size_normal" />
+
+            <ImageButton
+                android:id="@+id/search_clear"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:background="@null"
+                android:contentDescription="@string/search_clear"
+                android:src="@android:drawable/ic_menu_close_clear_cancel" />
+        </LinearLayout>
+
+        <!-- v7：搜索历史面板；高度按记录条数动态计算，最多约五行，其余滚动查看 -->
+        <ScrollView
+            android:id="@+id/search_history_panel"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:background="#FFFFFFFF"
+            android:visibility="gone" >
+
+            <LinearLayout
+                android:id="@+id/search_history_list"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical" />
+        </ScrollView>
+
         <ListView
             android:id="@+id/notes_list"
             android:layout_width="fill_parent"

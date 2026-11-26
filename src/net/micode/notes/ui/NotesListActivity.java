@@ -19,6 +19,7 @@ package net.micode.notes.ui;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
+import android.app.SearchManager;
 import android.appwidget.AppWidgetManager;
 import android.content.AsyncQueryHandler;
 import android.content.ContentResolver;
@@ -31,15 +32,18 @@ import android.database.Cursor;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.Handler;
 import android.preference.PreferenceManager;
 import android.text.Editable;
 import android.text.TextUtils;
 import android.text.TextWatcher;
 import android.util.Log;
+import android.util.TypedValue;
 import android.view.ActionMode;
 import android.view.ContextMenu;
 import android.view.ContextMenu.ContextMenuInfo;
 import android.view.Display;
+import android.view.Gravity;
 import android.view.HapticFeedbackConstants;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -50,12 +54,15 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.View.OnCreateContextMenuListener;
 import android.view.View.OnTouchListener;
+import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.AdapterView.OnItemLongClickListener;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageButton;
+import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.PopupMenu;
 import android.widget.TextView;
@@ -65,11 +72,15 @@ import net.micode.notes.R;
 import net.micode.notes.data.NoteListSort;
 import net.micode.notes.data.Notes;
 import net.micode.notes.data.Notes.NoteColumns;
+import net.micode.notes.data.TagSql;
+import net.micode.notes.data.TagStore;
 import net.micode.notes.model.WorkingNote;
 import net.micode.notes.tool.BackupNote;
 import net.micode.notes.tool.BackupUtils;
 import net.micode.notes.tool.DataUtils;
 import net.micode.notes.tool.NoteBackupCodec;
+import net.micode.notes.tool.NoteSearchSql;
+import net.micode.notes.tool.SearchHistory;
 import net.micode.notes.tool.ReminderNotifier;
 import net.micode.notes.tool.ReminderScheduler;
 import net.micode.notes.tool.ResourceParser;
@@ -84,6 +95,7 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.HashSet;
@@ -104,6 +116,16 @@ public class NotesListActivity extends Activity implements OnClickListener, OnIt
     private static final String PREFERENCE_ADD_INTRODUCTION = "net.micode.notes.introduction";
 
     private static final String PREFERENCE_LIST_SORT = "net.micode.notes.list_sort";
+
+    /** 列表的标签筛选条件，存 tag id；{@link TagStore#NO_TAG} 表示不筛选。 */
+    private static final String PREFERENCE_TAG_FILTER = "net.micode.notes.list_tag_filter";
+
+    /** 搜索态的基础条件：全局搜未删除的文本便签，不受当前文件夹限制。 */
+    private static final String SEARCH_SELECTION = NoteColumns.TYPE + "=" + Notes.TYPE_NOTE
+            + " AND " + NoteColumns.PARENT_ID + "<>" + Notes.ID_TRASH_FOLER;
+
+    /** 输入停顿多久后才真正查询，避免中文输入法候选阶段的连续抖动。 */
+    private static final long SEARCH_QUERY_DELAY_MS = 250;
 
     private enum ListEditState {
         NOTE_LIST, SUB_FOLDER, CALL_RECORD_FOLDER
@@ -128,6 +150,31 @@ public class NotesListActivity extends Activity implements OnClickListener, OnIt
     private int mDispatchY;
 
     private TextView mTitleBar;
+
+    /** 顶部搜索栏与输入框；默认隐藏，点菜单“搜索”展开。 */
+    private EditText mSearchInput;
+
+    private android.view.View mSearchBar;
+
+    /** 当前生效的搜索关键词（原始输入，可能含多个词）。 */
+    private String mSearchQuery = "";
+
+    /** 搜索历史存储；只保留最近 10 条。 */
+    private SearchHistory mSearchHistory;
+
+    private final Handler mSearchHandler = new Handler();
+
+    /** 输入停止 250ms 后才真正查库，避免输入法逐字回调触发多次查询。 */
+    private final Runnable mSearchRunnable = new Runnable() {
+        public void run() {
+            String query = mSearchInput == null ? "" : mSearchInput.getText().toString().trim();
+            if (!query.equals(mSearchQuery)) {
+                mSearchQuery = query;
+                startAsyncNotesListQuery();
+                refreshSearchHistory();
+            }
+        }
+    };
 
     private long mCurrentFolderId;
 
@@ -267,6 +314,30 @@ public class NotesListActivity extends Activity implements OnClickListener, OnIt
         mDispatchY = 0;
         mOriginY = 0;
         mTitleBar = (TextView) findViewById(R.id.tv_title_bar);
+        mSearchBar = findViewById(R.id.search_bar);
+        mSearchInput = (EditText) findViewById(R.id.search_input);
+        findViewById(R.id.search_clear).setOnClickListener(this);
+        mSearchHistory = new SearchHistory(PreferenceManager.getDefaultSharedPreferences(this));
+        // 键盘上的“搜索”键才是明确的一次搜索意图，此时才写历史（避免逐字记录）
+        mSearchInput.setOnEditorActionListener((v, actionId, event) -> {
+            if (actionId == EditorInfo.IME_ACTION_SEARCH) {
+                recordSearchKeyword();
+                return true;
+            }
+            return false;
+        });
+        mSearchInput.addTextChangedListener(new TextWatcher() {
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+            }
+
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+            }
+
+            public void afterTextChanged(Editable s) {
+                mSearchHandler.removeCallbacks(mSearchRunnable);
+                mSearchHandler.postDelayed(mSearchRunnable, SEARCH_QUERY_DELAY_MS);
+            }
+        });
         mState = ListEditState.NOTE_LIST;
         mModeCallBack = new ModeCallback();
     }
@@ -473,14 +544,40 @@ public class NotesListActivity extends Activity implements OnClickListener, OnIt
     };
 
     private void startAsyncNotesListQuery() {
-        String selection = (mCurrentFolderId == Notes.ID_ROOT_FOLDER) ? ROOT_FOLDER_SELECTION
-                : NORMAL_SELECTION;
         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
+        List<String> keywords = NoteSearchSql.parseKeywords(mSearchQuery);
+        boolean searching = !keywords.isEmpty();
+        // 搜索态不受当前文件夹限制：全局搜“未删除的文本便签”，语义上更符合“搜索整个便签本”
+        String selection;
+        String[] selectionArgs;
+        if (searching) {
+            selection = SEARCH_SELECTION;
+            selectionArgs = new String[0];
+        } else {
+            selection = (mCurrentFolderId == Notes.ID_ROOT_FOLDER) ? ROOT_FOLDER_SELECTION
+                    : NORMAL_SELECTION;
+            selectionArgs = new String[] { String.valueOf(mCurrentFolderId) };
+        }
+        // 标签筛选只收窄 WHERE：与文件夹条件用 AND 组合、参数追加在末尾。
+        // 排序（含置顶优先）仍由 NoteListSort.toSql() 决定，所以“标签 + 排序 + 置顶”天然叠加。
+        long tagFilter = preferences.getLong(PREFERENCE_TAG_FILTER, TagStore.NO_TAG);
+        if (tagFilter > 0) {
+            selection = TagSql.withTag(selection);
+            selectionArgs = TagSql.withTagArgs(selectionArgs, String.valueOf(tagFilter));
+        }
         NoteListSort sort = NoteListSort.fromPreference(preferences.getString(PREFERENCE_LIST_SORT, null));
+        String sortOrder = sort.toSql();
+        if (searching) {
+            // 关键词条件最后拼，保证参数顺序与 SQL 里占位符出现顺序一致
+            selection = NoteSearchSql.withKeywords(selection, keywords);
+            selectionArgs = NoteSearchSql.withKeywordArgs(selectionArgs, keywords);
+            // 相关度优先；分数相同再走用户选择的排序，置顶依然排在最前
+            sortOrder = NoteSearchSql.relevanceOrder(keywords) + "," + sortOrder;
+        }
         mLatestNotesQuery = new Object();
         mBackgroundQueryHandler.startQuery(FOLDER_NOTE_LIST_QUERY_TOKEN, mLatestNotesQuery,
-                Notes.CONTENT_NOTE_URI, NoteItemData.PROJECTION, selection,
-                new String[] { String.valueOf(mCurrentFolderId) }, sort.toSql());
+                Notes.CONTENT_NOTE_URI, NoteItemData.PROJECTION, selection, selectionArgs,
+                sortOrder);
     }
 
     private final class BackgroundQueryHandler extends AsyncQueryHandler {
@@ -602,6 +699,13 @@ public class NotesListActivity extends Activity implements OnClickListener, OnIt
         Intent intent = new Intent(this, NoteEditActivity.class);
         intent.setAction(Intent.ACTION_VIEW);
         intent.putExtra(Intent.EXTRA_UID, data.getId());
+        // 搜索态打开便签时把关键词带过去，编辑页会高亮命中片段
+        if (!TextUtils.isEmpty(mSearchQuery)) {
+            intent.putExtra(SearchManager.EXTRA_DATA_KEY, String.valueOf(data.getId()));
+            intent.putExtra(SearchManager.USER_QUERY, mSearchQuery);
+            // 真正点开了一条结果，说明这次搜索有效，记入历史
+            recordSearchKeyword();
+        }
         this.startActivityForResult(intent, REQUEST_CODE_OPEN_NODE);
     }
 
@@ -625,6 +729,9 @@ public class NotesListActivity extends Activity implements OnClickListener, OnIt
     public void onClick(View v) {
         if (v.getId() == R.id.btn_new_note) {
             createNewNote();
+        } else if (v.getId() == R.id.search_clear) {
+            // 清空输入会触发 TextWatcher，查询条件随之恢复
+            mSearchInput.setText("");
         }
     }
 
@@ -727,6 +834,11 @@ public class NotesListActivity extends Activity implements OnClickListener, OnIt
 
     @Override
     public void onBackPressed() {
+        // 搜索态下返回键先收起搜索栏，再按原有层级返回
+        if (mSearchBar != null && mSearchBar.getVisibility() == View.VISIBLE) {
+            hideSearchBar();
+            return;
+        }
         switch (mState) {
             case SUB_FOLDER:
                 mCurrentFolderId = Notes.ID_ROOT_FOLDER;
@@ -826,6 +938,7 @@ public class NotesListActivity extends Activity implements OnClickListener, OnIt
         menu.clear();
         if (mState == ListEditState.NOTE_LIST) {
             getMenuInflater().inflate(R.menu.note_list, menu);
+            updateTagFilterMenuTitle(menu);
         } else if (mState == ListEditState.SUB_FOLDER) {
             getMenuInflater().inflate(R.menu.sub_folder, menu);
         } else if (mState == ListEditState.CALL_RECORD_FOLDER) {
@@ -843,6 +956,8 @@ public class NotesListActivity extends Activity implements OnClickListener, OnIt
             showCreateOrModifyFolderDialog(true);
         } else if (itemId == R.id.menu_note_sort) {
             showNoteSortDialog();
+        } else if (itemId == R.id.menu_tag_filter) {
+            showTagFilterDialog();
         } else if (itemId == R.id.menu_export_text) {
             exportNoteToText();
         } else if (itemId == R.id.menu_backup_json) {
@@ -861,7 +976,7 @@ public class NotesListActivity extends Activity implements OnClickListener, OnIt
         } else if (itemId == R.id.menu_new_note) {
             createNewNote();
         } else if (itemId == R.id.menu_search) {
-            onSearchRequested();
+            showSearchBar();
         }
         return true;
     }
@@ -895,8 +1010,215 @@ public class NotesListActivity extends Activity implements OnClickListener, OnIt
 
     @Override
     public boolean onSearchRequested() {
-        startSearch(null, false, null /* appData */, false);
+        // 不再交给系统搜索框：那条链路依赖 exported 的建议 Provider，且没法带上标签条件
+        showSearchBar();
         return true;
+    }
+
+    /**
+     * v7+：展开顶部搜索栏并弹出输入法。
+     *
+     * <p>搜索走列表自己的查询：关键词条件与文件夹/标签条件用 AND 组合，
+     * 结果仍由列表适配器渲染，点开便签时把关键词带过去做高亮。</p>
+     */
+    private void showSearchBar() {
+        if (mSearchBar == null) {
+            return;
+        }
+        mSearchBar.setVisibility(View.VISIBLE);
+        mSearchInput.requestFocus();
+        InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+        if (imm != null) {
+            imm.showSoftInput(mSearchInput, InputMethodManager.SHOW_IMPLICIT);
+        }
+        refreshSearchHistory();
+    }
+
+    /**
+     * 收起搜索栏：清空关键词并恢复未筛选的列表。
+     */
+    private void hideSearchBar() {
+        if (mSearchBar == null || mSearchBar.getVisibility() != View.VISIBLE) {
+            return;
+        }
+        mSearchBar.setVisibility(View.GONE);
+        mSearchInput.setText("");
+        mSearchQuery = "";
+        mSearchHandler.removeCallbacks(mSearchRunnable);
+        InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+        if (imm != null) {
+            imm.hideSoftInputFromWindow(mSearchInput.getWindowToken(), 0);
+        }
+        refreshSearchHistory();
+        startAsyncNotesListQuery();
+    }
+
+    /**
+     * v7：把当前关键词写入搜索历史（去重、置顶、最多 10 条）。
+     */
+    private void recordSearchKeyword() {
+        if (TextUtils.isEmpty(mSearchQuery) || mSearchHistory == null) {
+            return;
+        }
+        mSearchHistory.record(mSearchQuery);
+        refreshSearchHistory();
+    }
+
+    /**
+     * 刷新搜索历史面板。
+     *
+     * <p>只有三个条件同时成立才显示：搜索栏展开、输入框为空、确实有历史记录。
+     * 因此“不在搜索页”或“没有记录”时看不到这个面板，自然也就看不到底部的清空项。</p>
+     */
+    private void refreshSearchHistory() {
+        View panel = findViewById(R.id.search_history_panel);
+        LinearLayout container = (LinearLayout) findViewById(R.id.search_history_list);
+        if (panel == null || container == null || mSearchHistory == null) {
+            return;
+        }
+        container.removeAllViews();
+        List<String> history = mSearchHistory.list();
+        boolean searchVisible = mSearchBar != null && mSearchBar.getVisibility() == View.VISIBLE;
+        boolean blankInput = mSearchInput == null || mSearchInput.getText().length() == 0;
+        if (!searchVisible || !blankInput || history.isEmpty()) {
+            panel.setVisibility(View.GONE);
+            return;
+        }
+        for (String keyword : history) {
+            container.addView(createHistoryRow(keyword));
+        }
+        container.addView(createClearHistoryRow());
+        // 高度按条数收缩，超过约五行才滚动
+        int rows = history.size() + 1;
+        panel.getLayoutParams().height = Math.min(rows * dp(48), dp(240));
+        panel.setVisibility(View.VISIBLE);
+    }
+
+    /**
+     * 单条历史：左侧关键词，右侧小 ×；点整行直接回填关键词。
+     */
+    private View createHistoryRow(final String keyword) {
+        LinearLayout row = new LinearLayout(this);
+        row.setOrientation(LinearLayout.HORIZONTAL);
+        row.setGravity(Gravity.CENTER_VERTICAL);
+        row.setPadding(dp(16), 0, dp(4), 0);
+
+        TextView label = new TextView(this);
+        label.setText(keyword);
+        label.setTextColor(0xFF333333);
+        label.setTextSize(TypedValue.COMPLEX_UNIT_SP, 15);
+        label.setSingleLine(true);
+        label.setEllipsize(TextUtils.TruncateAt.END);
+        row.addView(label, new LinearLayout.LayoutParams(0, dp(48), 1f));
+
+        ImageButton delete = new ImageButton(this);
+        delete.setImageResource(android.R.drawable.ic_menu_close_clear_cancel);
+        delete.setBackground(null);
+        delete.setContentDescription(getString(R.string.search_history_delete));
+        delete.setOnClickListener(v -> confirmRemoveHistory(keyword));
+        row.addView(delete, new LinearLayout.LayoutParams(dp(48), dp(48)));
+
+        row.setOnClickListener(v -> {
+            mSearchInput.setText(keyword);
+            mSearchInput.setSelection(keyword.length());
+        });
+        return row;
+    }
+
+    /**
+     * 历史列表最后一栏：清空全部。
+     */
+    private View createClearHistoryRow() {
+        TextView clear = new TextView(this);
+        clear.setText(R.string.search_history_clear);
+        clear.setGravity(Gravity.CENTER);
+        clear.setTextColor(0xFF8C6A4A);
+        clear.setTextSize(TypedValue.COMPLEX_UNIT_SP, 14);
+        clear.setPadding(0, dp(14), 0, dp(14));
+        clear.setOnClickListener(v -> confirmClearHistory());
+        return clear;
+    }
+
+    private void confirmRemoveHistory(final String keyword) {
+        new AlertDialog.Builder(this)
+                .setTitle(R.string.search_history_delete_title)
+                .setMessage(keyword)
+                .setPositiveButton(android.R.string.ok, (dialog, which) -> {
+                    mSearchHistory.remove(keyword);
+                    refreshSearchHistory();
+                })
+                .setNegativeButton(android.R.string.cancel, null)
+                .show();
+    }
+
+    private void confirmClearHistory() {
+        new AlertDialog.Builder(this)
+                .setTitle(R.string.search_history_clear_title)
+                .setPositiveButton(android.R.string.ok, (dialog, which) -> {
+                    mSearchHistory.clear();
+                    refreshSearchHistory();
+                })
+                .setNegativeButton(android.R.string.cancel, null)
+                .show();
+    }
+
+    private int dp(int value) {
+        return (int) (value * getResources().getDisplayMetrics().density + 0.5f);
+    }
+
+    /**
+     * v7：标签筛选对话框。第一项是“全部”，其后是全部标签（预设在前）。
+     *
+     * <p>选择结果写进偏好后重新查询；筛选只影响 WHERE，排序与置顶优先级不变。</p>
+     */
+    private void showTagFilterDialog() {
+        final List<TagStore.Tag> tags = TagStore.listTags(this);
+        final List<Long> ids = new ArrayList<>();
+        final List<CharSequence> labels = new ArrayList<>();
+        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
+        long current = preferences.getLong(PREFERENCE_TAG_FILTER, TagStore.NO_TAG);
+        ids.add(TagStore.NO_TAG);
+        labels.add(getString(R.string.tag_filter_all));
+        int checked = 0;
+        for (TagStore.Tag tag : tags) {
+            if (tag.id == current) {
+                checked = ids.size();
+            }
+            ids.add(tag.id);
+            labels.add(tag.name);
+        }
+        new AlertDialog.Builder(this)
+                .setTitle(R.string.menu_tag_filter)
+                .setSingleChoiceItems(labels.toArray(new CharSequence[0]), checked,
+                        (dialog, which) -> {
+                            preferences.edit()
+                                    .putLong(PREFERENCE_TAG_FILTER, ids.get(which)).apply();
+                            startAsyncNotesListQuery();
+                            dialog.dismiss();
+                        })
+                .setNegativeButton(android.R.string.cancel, null)
+                .show();
+    }
+
+    /**
+     * 菜单里的筛选项显示当前生效的标签名，避免用户忘记列表被筛过。
+     */
+    private void updateTagFilterMenuTitle(Menu menu) {
+        MenuItem item = menu.findItem(R.id.menu_tag_filter);
+        if (item == null) {
+            return;
+        }
+        long tagId = PreferenceManager.getDefaultSharedPreferences(this)
+                .getLong(PREFERENCE_TAG_FILTER, TagStore.NO_TAG);
+        if (tagId <= 0) {
+            return;
+        }
+        for (TagStore.Tag tag : TagStore.listTags(this)) {
+            if (tag.id == tagId) {
+                item.setTitle(getString(R.string.tag_filter_active, tag.name));
+                break;
+            }
+        }
     }
 
     /**
