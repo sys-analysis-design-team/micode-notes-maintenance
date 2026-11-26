@@ -39,6 +39,10 @@
         android:title="@string/menu_text_statistics" />
 
     <item
+        android:id="@+id/menu_edit_tags"
+        android:title="@string/menu_edit_tags" />
+
+    <item
         android:id="@+id/menu_share"
         android:title="@string/menu_share"/>
 

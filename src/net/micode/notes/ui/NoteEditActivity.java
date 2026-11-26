@@ -58,6 +58,7 @@ import android.widget.Toast;
 import net.micode.notes.R;
 import net.micode.notes.data.Notes;
 import net.micode.notes.data.Notes.TextNote;
+import net.micode.notes.data.TagStore;
 import net.micode.notes.model.WorkingNote;
 import net.micode.notes.model.WorkingNote.NoteSettingChangedListener;
 import net.micode.notes.tool.AiAnalysis;
@@ -70,14 +71,17 @@ import net.micode.notes.tool.ReminderNotifier;
 import net.micode.notes.tool.ReminderRepeats;
 import net.micode.notes.tool.ReminderScheduler;
 import net.micode.notes.tool.ResourceParser;
+import net.micode.notes.tool.TagNames;
 import net.micode.notes.tool.ResourceParser.TextAppearanceResources;
 import net.micode.notes.ui.DateTimePickerDialog.OnDateTimeSetListener;
 import net.micode.notes.ui.NoteEditText.OnTextViewChangeListener;
 import net.micode.notes.widget.NoteWidgetProvider_2x;
 import net.micode.notes.widget.NoteWidgetProvider_4x;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
@@ -145,6 +149,15 @@ public class NoteEditActivity extends Activity implements OnClickListener,
     private View mNoteEditorPanel;
 
     private WorkingNote mWorkingNote;
+
+    /** 标签行：展示当前便签的标签，没有标签时整行隐藏。 */
+    private TextView mTagView;
+
+    /** 新便签尚未落库时的标签选择，保存成功后再写入关联表。 */
+    private List<Long> mPendingTagIds = new ArrayList<>();
+
+    /** 标签被改过：保存流程据此决定是否补一次写入。 */
+    private boolean mTagsDirty;
 
     private SharedPreferences mSharedPrefs;
     private int mFontSizeId;
@@ -309,6 +322,7 @@ public class NoteEditActivity extends Activity implements OnClickListener,
          * is not ready
          */
         showAlertHeader();
+        refreshTags();
     }
 
     private void showAlertHeader() {
@@ -412,6 +426,7 @@ public class NoteEditActivity extends Activity implements OnClickListener,
         mNoteHeaderHolder.tvAlertDate = (TextView) findViewById(R.id.tv_alert_date);
         mNoteHeaderHolder.ibSetBgColor = (ImageView) findViewById(R.id.btn_set_bg_color);
         mNoteHeaderHolder.ibSetBgColor.setOnClickListener(this);
+        mTagView = (TextView) findViewById(R.id.tv_note_tags);
         mNoteEditor = (EditText) findViewById(R.id.note_edit_view);
         mNoteEditorPanel = findViewById(R.id.sv_note_edit);
         mNoteBgColorSelector = findViewById(R.id.note_bg_color_selector);
@@ -574,6 +589,8 @@ public class NoteEditActivity extends Activity implements OnClickListener,
             sendTo(this, mWorkingNote.getContent());
         } else if (itemId == R.id.menu_text_statistics) {
             showTextStatistics();
+        } else if (itemId == R.id.menu_edit_tags) {
+            showTagDialog();
         } else if (itemId == R.id.menu_send_to_desktop) {
             sendToDesktop();
         } else if (itemId == R.id.menu_ai_analyze) {
@@ -616,6 +633,121 @@ public class NoteEditActivity extends Activity implements OnClickListener,
             }
         }
         return text;
+    }
+
+    /**
+     * v7：标签多选对话框。
+     *
+     * <p>列出全部标签（预设先建，因此排在前面），勾选即关联到当前便签；点“新建标签”
+     * 可以边建边选。新便签还没落库时先记为待写入，等保存拿到 note id 后再补写关联表。</p>
+     */
+    private void showTagDialog() {
+        final List<TagStore.Tag> tags = TagStore.listTags(this);
+        final List<Long> selected = new ArrayList<>(selectedTagIds());
+        final boolean[] checked = new boolean[tags.size()];
+        CharSequence[] labels = new CharSequence[tags.size()];
+        for (int i = 0; i < tags.size(); i++) {
+            labels[i] = tags.get(i).name;
+            checked[i] = selected.contains(tags.get(i).id);
+        }
+        new AlertDialog.Builder(this)
+                .setTitle(R.string.tag_dialog_title)
+                .setMultiChoiceItems(labels, checked,
+                        (dialog, which, isChecked) -> checked[which] = isChecked)
+                .setPositiveButton(android.R.string.ok, (dialog, which) -> {
+                    List<Long> picked = new ArrayList<>();
+                    for (int i = 0; i < tags.size(); i++) {
+                        if (checked[i]) {
+                            picked.add(tags.get(i).id);
+                        }
+                    }
+                    applyTags(picked);
+                })
+                .setNeutralButton(R.string.tag_new, (dialog, which) -> showCreateTagDialog())
+                .setNegativeButton(android.R.string.cancel, null)
+                .show();
+    }
+
+    /**
+     * v7：新建标签。
+     *
+     * <p>一次可以输入多个（用中英文逗号、分号或换行分隔），重名标签直接复用不报错；
+     * 建完自动勾选并重新打开标签对话框，避免用户再点一次。</p>
+     */
+    private void showCreateTagDialog() {
+        EditText input = new EditText(this);
+        input.setSingleLine(true);
+        input.setHint(R.string.tag_new_hint);
+        new AlertDialog.Builder(this)
+                .setTitle(R.string.tag_new)
+                .setView(input)
+                .setPositiveButton(android.R.string.ok, (dialog, which) -> {
+                    List<String> added = new ArrayList<>();
+                    List<Long> picked = new ArrayList<>(selectedTagIds());
+                    for (String name : TagNames.parse(input.getText().toString())) {
+                        TagStore.Tag tag = TagStore.createTag(this, name);
+                        if (tag != null) {
+                            added.add(tag.name);
+                            if (!picked.contains(tag.id)) {
+                                picked.add(tag.id);
+                            }
+                        }
+                    }
+                    if (!added.isEmpty()) {
+                        applyTags(picked);
+                        Toast.makeText(this, getString(R.string.tag_added,
+                                TagNames.join(added)), Toast.LENGTH_SHORT).show();
+                    }
+                    showTagDialog();
+                })
+                .setNegativeButton(android.R.string.cancel, null)
+                .show();
+    }
+
+    /**
+     * 当前便签已选的标签 id：已落库取库里的，新便签取内存里的暂存值。
+     */
+    private List<Long> selectedTagIds() {
+        if (mWorkingNote != null && mWorkingNote.getNoteId() > 0) {
+            return TagStore.tagIdsOfNote(this, mWorkingNote.getNoteId());
+        }
+        return mPendingTagIds;
+    }
+
+    /**
+     * 落地标签选择：已落库的便签立即写关联表，新便签只记住选择，等保存时补写。
+     */
+    private void applyTags(List<Long> tagIds) {
+        mPendingTagIds = new ArrayList<>(tagIds);
+        mTagsDirty = true;
+        if (mWorkingNote != null && mWorkingNote.getNoteId() > 0) {
+            TagStore.setTagsOfNote(this, mWorkingNote.getNoteId(), mPendingTagIds);
+            mTagsDirty = false;
+        }
+        refreshTags();
+    }
+
+    /**
+     * 刷新编辑页顶部的标签行；没有标签时整行隐藏，不占高度。
+     */
+    private void refreshTags() {
+        if (mTagView == null || mWorkingNote == null) {
+            return;
+        }
+        List<Long> ids = selectedTagIds();
+        List<String> names = new ArrayList<>();
+        for (TagStore.Tag tag : TagStore.listTags(this)) {
+            if (ids.contains(tag.id)) {
+                names.add(tag.name);
+            }
+        }
+        String text = TagNames.join(names);
+        mTagView.setText(text);
+        // 标签行没有自己的背景，必须跟随标题栏的纸色，否则会露出窗口的深色底纹
+        if (!text.isEmpty()) {
+            mTagView.setBackgroundResource(mWorkingNote.getTitleBgResId());
+        }
+        mTagView.setVisibility(text.isEmpty() ? View.GONE : View.VISIBLE);
     }
 
     private void setReminder() {
@@ -1144,6 +1276,11 @@ public class NoteEditActivity extends Activity implements OnClickListener,
              * {@link #RESULT_OK} is used to identify the create/edit state
              */
             setResult(RESULT_OK);
+            // 新便签在本次保存后才拿到 note id，标签关联必须在这时补写
+            if (mTagsDirty && mWorkingNote.getNoteId() > 0) {
+                TagStore.setTagsOfNote(this, mWorkingNote.getNoteId(), mPendingTagIds);
+                mTagsDirty = false;
+            }
         }
         return saved;
     }

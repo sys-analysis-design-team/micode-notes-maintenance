@@ -199,6 +199,11 @@
 
     <string name="search_label">正在搜索便籤</string>
     <string name="search_hint">搜索便籤</string>
+    <string name="search_clear">清除</string>
+    <string name="search_history_delete">刪除</string>
+    <string name="search_history_delete_title">刪除這筆搜尋記錄？</string>
+    <string name="search_history_clear">清空搜尋記錄</string>
+    <string name="search_history_clear_title">清空全部搜尋記錄？</string>
     <string name="search_setting_description">便籤中的文字</string>
     <string name="search">便籤</string>
     <string name="datetime_dialog_ok">設置</string>
@@ -215,4 +220,15 @@
     <string name="note_sort_created_oldest">建立時間（從舊到新）</string>
     <string name="menu_text_statistics">正文統計</string>
     <string name="note_text_statistics">字元數（含空白）：%1$d\n字元數（不含空白）：%2$d\n非空白行數：%3$d</string>
+    <!-- 標籤（tag v7） -->
+    <string name="tag_preset_work">工作</string>
+    <string name="tag_preset_study">學習</string>
+    <string name="menu_edit_tags">標籤</string>
+    <string name="menu_tag_filter">依標籤篩選</string>
+    <string name="tag_filter_all">全部便籤</string>
+    <string name="tag_filter_active">篩選：%1$s</string>
+    <string name="tag_dialog_title">標籤</string>
+    <string name="tag_new">新增標籤…</string>
+    <string name="tag_new_hint">標籤名稱，多個可用逗號分隔</string>
+    <string name="tag_added">已新增標籤：%1$s</string>
 </resources>

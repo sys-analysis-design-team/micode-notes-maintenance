@@ -14,6 +14,10 @@ local.properties
 .classpath
 .project
 
+# IDE project files (由 Android Studio 自动生成，不入库)
+.idea/
+*.iml
+
 # workspace artifacts
 logs/*.png
 logs/*.zip

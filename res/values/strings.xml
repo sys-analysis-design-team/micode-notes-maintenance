@@ -205,6 +205,11 @@
 
     <string name="search_label">Searching Notes</string>
     <string name="search_hint">Search notes</string>
+    <string name="search_clear">Clear</string>
+    <string name="search_history_delete">Delete</string>
+    <string name="search_history_delete_title">Delete this search record?</string>
+    <string name="search_history_clear">Clear search history</string>
+    <string name="search_history_clear_title">Clear all search history?</string>
     <string name="search_setting_description">Text in your notes</string>
     <string name="search">Notes</string>
     <string name="datetime_dialog_ok">set</string>
@@ -223,4 +228,15 @@
     <string name="note_sort_created_oldest">Created: oldest first</string>
     <string name="menu_text_statistics">Text statistics</string>
     <string name="note_text_statistics">Characters (including whitespace): %1$d\nCharacters (excluding whitespace): %2$d\nNon-blank lines: %3$d</string>
+    <!-- 标签（tag v7） -->
+    <string name="tag_preset_work">Work</string>
+    <string name="tag_preset_study">Study</string>
+    <string name="menu_edit_tags">Tags</string>
+    <string name="menu_tag_filter">Filter by tag</string>
+    <string name="tag_filter_all">All notes</string>
+    <string name="tag_filter_active">Filter: %1$s</string>
+    <string name="tag_dialog_title">Tags</string>
+    <string name="tag_new">New tag…</string>
+    <string name="tag_new_hint">Tag name, separate several with commas</string>
+    <string name="tag_added">Tag added: %1$s</string>
 </resources>

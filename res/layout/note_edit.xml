@@ -63,6 +63,17 @@
                 android:background="@drawable/bg_btn_set_color" />
         </LinearLayout>
 
+        <!-- 标签行：未打标签时 GONE，不占高度 -->
+        <TextView
+            android:id="@+id/tv_note_tags"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:paddingLeft="8dip"
+            android:paddingRight="8dip"
+            android:paddingBottom="4dip"
+            android:visibility="gone"
+            android:textAppearance="@style/TextAppearanceSecondaryItem" />
+
         <LinearLayout
             android:id="@+id/sv_note_edit"
             android:layout_width="fill_parent"

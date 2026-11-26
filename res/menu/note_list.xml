@@ -52,4 +52,8 @@
         android:id="@+id/menu_note_sort"
         android:title="@string/menu_note_sort" />
 
+    <item
+        android:id="@+id/menu_tag_filter"
+        android:title="@string/menu_tag_filter" />
+
 </menu>
